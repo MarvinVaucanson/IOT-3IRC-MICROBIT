@@ -1,3 +1,17 @@
+## Installation de l'environnement virtuel python
+
+```sh
+python -m venv .venv
+```
+
+```sh
+source .venv/bin/activate
+```
+
+```sh
+pip install -r requirements.txt
+```
+
 ## Format de stockage des données dans InfluxDB
 
 La base de données InfluxDB suit ce format pour stocker les données. Il y a un seul measurement, 
