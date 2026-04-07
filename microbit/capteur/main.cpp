@@ -12,6 +12,7 @@ void onData(MicroBitEvent)
         if (result == MICROBIT_OK)
             uBit.display.scroll("SENT");
     }
+
 }
 
 int main()
