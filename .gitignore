@@ -1,2 +1,4 @@
 /microbit/.vscode
 */.vscode
+/serveur/token
+/serveur/.venv
