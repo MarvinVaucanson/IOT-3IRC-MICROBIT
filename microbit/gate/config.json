@@ -1,6 +1,6 @@
-{
-    "microbit-dal": {
-        "bluetooth": {
+{    
+    "microbit-dal":{
+        "bluetooth":{
             "enabled": 0
         }
     }
