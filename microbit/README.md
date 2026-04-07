@@ -1,5 +1,7 @@
 # microbit-samples
 
+## You need to move into source the good file
+
 A collection of example programs using the micro:bit runtime.
 
 The source/examples folder contains a selection of samples demonstrating the capabilities and usage of the runtime APIs.

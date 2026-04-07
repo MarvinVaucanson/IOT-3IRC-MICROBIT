@@ -31,6 +31,8 @@ void onData(MicroBitEvent)
 {
     ManagedString s = uBit.radio.datagram.recv();
 
+    uBit.serial.printf("RX : %s", s.toCharArray());
+
     if (s == "PONG")
         uBit.display.scroll("OK");
     else
@@ -55,8 +57,20 @@ int main()
 
     while(1)
     {
-        uBit.radio.datagram.send("PING");
-        uBit.display.print(".");   // feedback visuel envoi
-        uBit.sleep(5000);
+        int result = uBit.radio.datagram.send("PING");
+
+        uBit.serial.printf("SEND: %d\n", result);
+    
+        if (result == MICROBIT_OK)
+            uBit.display.scroll("SENT");
+        else if (result == MICROBIT_INVALID_PARAMETER)
+            uBit.display.scroll("ERR_PARAM");
+        else if (result == MICROBIT_NOT_SUPPORTED){
+            uBit.display.scroll("ERR_RADIO");
+            uBit.display.scroll(ManagedString(result));
+        }
+        else
+            uBit.display.scroll(ManagedString(result));
+        uBit.sleep(6000);    
     }
 }

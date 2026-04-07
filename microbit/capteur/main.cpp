@@ -8,8 +8,11 @@ void onData(MicroBitEvent)
     if (s == "PING")
     {
         uBit.display.print("P");            // feedback visuel
-        uBit.radio.datagram.send("PONG");   // réponse
+        int result = uBit.radio.datagram.send("PONG");   // réponse
+        if (result == MICROBIT_OK)
+            uBit.display.scroll("SENT");
     }
+
 }
 
 int main()
