@@ -55,8 +55,18 @@ int main()
 
     while(1)
     {
-        uBit.radio.datagram.send("PING");
-        uBit.display.print(".");   // feedback visuel envoi
-        uBit.sleep(5000);
+        int result = uBit.radio.datagram.send("PING");
+    
+        if (result == MICROBIT_OK)
+            uBit.display.scroll("SENT");
+        else if (result == MICROBIT_INVALID_PARAMETER)
+            uBit.display.scroll("ERR_PARAM");
+        else if (result == MICROBIT_NOT_SUPPORTED){
+            uBit.display.scroll("ERR_RADIO");  // radio pas activée ?
+            uBit.display.scroll(ManagedString(result));
+        }
+        else
+            uBit.display.scroll(ManagedString(result)); // affiche le code brut
+        uBit.sleep(6000);    
     }
 }
