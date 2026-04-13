@@ -8,7 +8,7 @@
     />
 
     <item
-        android:id="@+id/nav_grid"
+        android:id="@+id/nav_priorities"
         android:icon="@drawable/ic_grid"
         android:title="PRIORITÉS"
     />

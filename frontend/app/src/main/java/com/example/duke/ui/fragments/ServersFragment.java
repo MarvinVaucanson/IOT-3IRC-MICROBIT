@@ -1,4 +1,4 @@
-package com.example.duke;
+package com.example.duke.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+
+import com.example.duke.R;
 
 public class ServersFragment extends Fragment {
     @Override
