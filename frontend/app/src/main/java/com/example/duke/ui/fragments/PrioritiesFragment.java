@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +18,7 @@ import com.example.duke.helpers.SensorDataParser;
 import com.example.duke.model.Sensor;
 import com.example.duke.processes.TestDataLoader;
 import com.example.duke.processes.UDPReceiver;
+import com.example.duke.viewmodel.SensorViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ public class PrioritiesFragment extends Fragment {
     private SensorAdapter adapter;
     private List<Sensor> sensors = new ArrayList<>();
     private UDPReceiver udpReceiver;
+
+    private SensorViewModel viewModel;
 
     @Override
     public View onCreateView( @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState ) {
@@ -42,12 +46,15 @@ public class PrioritiesFragment extends Fragment {
         adapter = new SensorAdapter( sensors );
         recyclerView.setAdapter( adapter );
 
+        viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
+
+        viewModel.getLastSensor().observe( getViewLifecycleOwner(), sensor -> {
+            updateSensor( sensor );
+        });
+
         if ( TEST_MODE ) {
             loadTestData();
-        } else {
-            startUDPReceiver();
         }
-
 
     }
 
@@ -58,18 +65,6 @@ public class PrioritiesFragment extends Fragment {
         List<Sensor> testSensors = TestDataLoader.parseAll(json);
         sensors.addAll( testSensors );
         adapter.notifyDataSetChanged();
-    }
-
-    private void startUDPReceiver() {
-        udpReceiver = new UDPReceiver();
-        udpReceiver.start( raw ->
-        {
-            Sensor sensor = SensorDataParser.parse( raw );
-
-            if ( sensor == null ) { return; }
-
-            requireActivity().runOnUiThread( () -> updateSensor( sensor ) );
-        });
     }
 
     private void updateSensor( Sensor newSensor ) {
