@@ -1,3 +1,4 @@
+"""Ceci est le code de réception + réponse (capteur)"""
 #include "MicroBit.h"
 
 MicroBit uBit;
