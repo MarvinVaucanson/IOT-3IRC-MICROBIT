@@ -1,3 +1,4 @@
+"""Ceci est le code de réception + réponse (capteur)"""
 #include "MicroBit.h"
 
 MicroBit uBit;
@@ -12,6 +13,7 @@ void onData(MicroBitEvent)
         if (result == MICROBIT_OK)
             uBit.display.scroll("SENT");
     }
+
 }
 
 int main()

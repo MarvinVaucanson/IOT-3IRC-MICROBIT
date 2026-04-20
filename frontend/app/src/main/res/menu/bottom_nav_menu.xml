@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_servers"
+        android:icon="@drawable/ic_servers"
+        android:title="SERVEURS"
+    />
+
+    <item
+        android:id="@+id/nav_priorities"
+        android:icon="@drawable/ic_grid"
+        android:title="PRIORITÉS"
+    />
+
+    <item
+        android:id="@+id/nav_system"
+        android:icon="@drawable/ic_system"
+        android:title="SYSTÈME"
+    />
+
+</menu>

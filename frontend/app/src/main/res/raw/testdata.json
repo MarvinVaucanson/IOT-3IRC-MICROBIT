@@ -1,0 +1,32 @@
+[
+  {
+    "sensor": "BOU",
+    "value": 23.5,
+    "unit": "CELS",
+    "protocol": "UDP"
+  },
+  {
+    "sensor": "HUMI",
+    "value": 61.2,
+    "unit": "PERC",
+    "protocol": "UDP"
+  },
+  {
+    "sensor": "LUX",
+    "value": 340,
+    "unit": "LUX",
+    "protocol": "UDP"
+  },
+  {
+    "sensor": "ACC",
+    "value": 1013,
+    "unit": "HPA",
+    "protocol": "UDP"
+  },
+  {
+    "sensor": "CO2",
+    "value": 420,
+    "unit": "PPM",
+    "protocol": "UDP"
+  }
+]
