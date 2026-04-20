@@ -3,10 +3,10 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 import time
 
 # Configuration (Infos de ton docker-compose)
-token = "cu088IqkeWN5ozdbLytOLsvXVq4ndI39scBUuGiv3DLEMt6iZHAhSUQdWmB86BypuWmZvRAVE4QKuaA6U4Hedg=="
+token = "hEz-eJo6NdCfKKDEaCnTZHT3iQBR7xOizRr5Xl0oYnx2roMw25JJ7sDSaSBHfMQaMKzEG9FVPpvIvm7fXEs0pg=="
 org = "CPE_Lyon"
 bucket = "iot_3irc-microbit"
-url = "http://10.42.225.248:8086"
+url = "http://influxdb:8086"
 
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)

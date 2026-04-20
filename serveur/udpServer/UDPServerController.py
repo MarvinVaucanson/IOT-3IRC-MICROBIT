@@ -1,4 +1,4 @@
-from influxHelper import *
+from common.influxHelper import *
 
 def printHello():
     print("Hello, World!")

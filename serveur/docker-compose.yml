@@ -14,6 +14,15 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_DB}
     restart: unless-stopped
 
+  udp-server:
+    build:
+      context: .
+      dockerfile: udpServer/Dockerfile
+    depends_on:
+      - influxdb
+    ports:
+      - "10000:10000/udp"
+
 
   grafana:
     image: grafana/grafana:latest
