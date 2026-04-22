@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.duke.R;
 import com.example.duke.helpers.SensorAdapter;
-import com.example.duke.helpers.SensorDataParser;
 import com.example.duke.model.Sensor;
 import com.example.duke.processes.TestDataLoader;
 import com.example.duke.processes.UDPReceiver;
+import com.example.duke.processes.UDPSender;
 import com.example.duke.viewmodel.SensorViewModel;
 
 import java.util.ArrayList;
@@ -25,10 +25,9 @@ import java.util.List;
 
 public class PrioritiesFragment extends Fragment {
 
-    private static final boolean TEST_MODE = true;
+    private static final boolean TEST_MODE = false;
     private SensorAdapter adapter;
     private List<Sensor> sensors = new ArrayList<>();
-    private UDPReceiver udpReceiver;
 
     private SensorViewModel viewModel;
 
@@ -55,7 +54,6 @@ public class PrioritiesFragment extends Fragment {
         if ( TEST_MODE ) {
             loadTestData();
         }
-
     }
 
     private void loadTestData() {
@@ -83,8 +81,5 @@ public class PrioritiesFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if ( udpReceiver != null ) {
-            udpReceiver.stop();
-        }
     }
 }

@@ -1,5 +1,7 @@
 package com.example.duke.processes;
 
+import android.util.Log;
+
 import com.example.duke.helpers.SensorDataParser;
 import com.example.duke.model.Sensor;
 import com.example.duke.viewmodel.SensorViewModel;
@@ -7,75 +9,70 @@ import com.example.duke.viewmodel.SensorViewModel;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
-public class UDPReceiver {
-    private static final int PORT = 8080;
+public class UDPReceiver implements Runnable {
     private static final int BUFFER_SIZE = 1024;
-
-    private Thread listener;
+    private final SensorViewModel viewModel;
     private DatagramSocket socket;
     private boolean running = false;
 
-    private SensorViewModel viewModel;
-
-    public UDPReceiver( SensorViewModel viewModel ) {
+    public UDPReceiver( DatagramSocket socket, SensorViewModel viewModel ) {
         this.viewModel = viewModel;
+        this.socket = socket;
     }
 
-    public void start()
+    @Override
+    public void run()
     {
         running = true;
-        listener = new Thread( ()->
-        {
-            try {
-                socket = new DatagramSocket( PORT );
-                viewModel.postConnected( true );
-                viewModel.postLog("[SYS] Socket UDP ouvert sur port " + PORT );
+        viewModel.postLog( "[SYS] Écoute UDP sur port local " + socket.getLocalPort() );
+        try {
+            while ( running ) {
+                byte[] dataReceived = new byte[ BUFFER_SIZE ];
 
-                byte[] buffer = new byte[ BUFFER_SIZE ];
+                DatagramPacket packet = new DatagramPacket( dataReceived, dataReceived.length );
 
-                while ( running ) {
-                    DatagramPacket packet = new DatagramPacket( buffer, buffer.length );
-                    socket.receive( packet );
+                socket.receive( packet );
 
-                    String data = new String( packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8 ).trim();
+                String data = new String( packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8 ).trim();
 
-                    if ( data.startsWith( "[" ) && data.endsWith( "]" ) ) {
-                        Sensor sensor = SensorDataParser.parse( data );
+                Log.d( "DEBUG", "Received: " + data );
 
-                        if ( sensor != null ) {
-                            viewModel.postSensor( sensor );
-                            viewModel.postLog(
-                                "[UDP] Reçu : " +
-                                sensor.getValue() + " " + sensor.getUnit() +
-                                " (" + sensor.getName() + ")" );
-                        } else {
-                            viewModel.postLog( "[WARN] Paquet JSON invalide" );
-                        }
-                    }
+                if ( data.isEmpty() || data.equals( "[]" ) ) {
+                    continue;
                 }
 
-            } catch ( IOException e ) {
-                if ( running ) {
-                    viewModel.postLog( "[ERR] " + e.getMessage() );
-                    viewModel.postConnected( false );
+                if ( data.startsWith( "[" ) && data.endsWith( "]" ) ) {
+                    Sensor sensor = SensorDataParser.parse( data );
+
+                    if ( sensor != null ) {
+                        viewModel.postSensor( sensor );
+                        viewModel.postLog(
+                            "[UDP] Reçu : " +
+                            sensor.getValue() + " " + sensor.getUnit() +
+                            " (" + sensor.getName() + ")" );
+                    } else {
+                        viewModel.postLog( "[WARN] Paquet JSON invalide : " + data );
+                    }
+                } else {
+                    viewModel.postLog( "[UDP] Reçu données brutes : " + data );
                 }
             }
-        } );
 
-        listener.start();
+        } catch ( IOException e ) {
+            if ( running ) {
+                viewModel.postLog( "[ERR] " + e.getMessage() );
+                viewModel.postConnected( false );
+            }
+        }
     }
 
     public void stop()
     {
         running = false;
-
-        viewModel.postConnected( false );
         viewModel.postLog( "[SYS] Socket UDP fermé" );
-
-        if ( socket != null && !socket.isClosed() ) {
-            socket.close();
-        }
     }
 }
