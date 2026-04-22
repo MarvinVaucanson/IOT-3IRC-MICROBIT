@@ -1,4 +1,21 @@
+# Ignore Visual Studio Code settings
 /microbit/.vscode
 */.vscode
-/serveur/token
-/serveur/.venv
+
+# Ignore .DS_Store files (macOS)
+.DS_Store
+
+# Ignore token
+/backend/token
+
+# Ignore Python virtual environments
+/backend/.venv
+
+# Ignore InfluxDB configuration
+/backend/influxdb_config
+
+# Ignore IDE configuration files
+.idea
+
+# Ignore environment variable files
+*/.env

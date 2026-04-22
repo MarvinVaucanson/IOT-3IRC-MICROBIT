@@ -1,0 +1,37 @@
+services:
+  influxdb:
+    image: influxdb:2.8
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - ./influxdb_config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=CPE_Lyon
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_DB}
+    restart: unless-stopped
+
+  udp-server:
+    build:
+      context: .
+      dockerfile: udpServer/Dockerfile
+    depends_on:
+      - influxdb
+    ports:
+      - "10000:10000/udp"
+
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+    restart: unless-stopped
+
+volumes:
+  influxdb_data:
