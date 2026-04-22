@@ -6,13 +6,13 @@
 .DS_Store
 
 # Ignore token
-/serveur/token
+/backend/token
 
 # Ignore Python virtual environments
-/serveur/.venv
+/backend/.venv
 
 # Ignore InfluxDB configuration
-/serveur/influxdb_config
+/backend/influxdb_config
 
 # Ignore IDE configuration files
 .idea

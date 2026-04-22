@@ -6,6 +6,7 @@ ENV PYTHONPATH=/app
 
 COPY common ./common
 COPY udpServer ./udpServer
+COPY .env .env
 
 RUN pip install -r common/requirements.txt
 
