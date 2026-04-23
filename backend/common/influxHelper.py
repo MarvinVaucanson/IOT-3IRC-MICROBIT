@@ -12,7 +12,7 @@ load_dotenv(dotenv_path=env_path)
 token = os.getenv("INFLUXDB_TOKEN")
 org = "CPE_Lyon"
 bucket = "iot_3irc-microbit"
-url = "http://192.168.1.132:8086"
+url = "http://10.42.229.174:8086"
 
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -53,3 +53,39 @@ def readLastData():
                                 "deviceId": record["deviceId"]
                         })
         return res
+
+def readLastDataForDevice(deviceId):
+    res = []
+    query = f'''
+                        from(bucket: "{bucket}")
+                        |> range(start: -24h) 
+                        |> filter(fn: (r) => r["_measurement"] == "data")
+                        |> filter(fn: (r) => r["deviceId"] == "{deviceId}")
+                        |> last()
+                '''
+    result = client.query_api().query(query)
+
+    for table in result:
+        for record in table.records:
+            res.append({
+                "sensor": record.get_field(),
+                "value": record.get_value(),
+                "unit": UNIT[record.get_field()],
+                "protocol": "UDP",
+            })
+    return res
+
+def getAllDevicesInInflux():
+    res = []
+    query = f"""
+            from(bucket: "iot_3irc-microbit")
+              |> range(start: -30d)
+              |> keep(columns: ["deviceId"])
+              |> distinct(column: "deviceId")
+    """
+    result = client.query_api().query(query)
+    for table in result:
+        for record in table.records:
+            res.append(record.get_value())
+
+    return res

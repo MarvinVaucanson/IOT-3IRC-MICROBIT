@@ -13,7 +13,7 @@ load_dotenv(dotenv_path=env_path)
 token = os.getenv("INFLUXDB_TOKEN")
 org = "CPE_Lyon"
 bucket = "iot_3irc-microbit"
-url = "http://192.168.1.132:8086"
+url = "http://10.42.229.174:8086"
 
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)

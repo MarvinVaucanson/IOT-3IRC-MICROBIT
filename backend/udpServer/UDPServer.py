@@ -18,6 +18,8 @@ print(f"Serveur UDP prêt sur le port {UDP_PORT}...")
 
 ROUTES = {
     "hello": printHello,
+    "device": getAllDevices,
+    "dataByDevice/": getDataByDevice,
     "data": currentData
 }
 
@@ -30,4 +32,7 @@ while True:
     for route, method in ROUTES.items():
         if message == route:
             data = method()
+            sendData(json.dumps(data, ensure_ascii=False), addr)
+        elif route[-1] == "/" and message.startswith(route):
+            data = method(message)
             sendData(json.dumps(data, ensure_ascii=False), addr)
