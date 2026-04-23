@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="#1A1C1E"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Microbit icon badge -->
+        <TextView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_badge_number"
+            android:gravity="center"
+            android:text="M"
+            android:textColor="#00DAF3"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <!-- Device ID -->
+        <TextView
+            android:id="@+id/textViewDeviceId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:textColor="#E2E2E5"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <!-- Chevron -->
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:contentDescription="arrow"
+            android:src="@drawable/ic_grid"
+            app:tint="#00DAF3" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

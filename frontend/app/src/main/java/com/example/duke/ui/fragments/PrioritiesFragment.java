@@ -1,5 +1,6 @@
 package com.example.duke.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,23 +14,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.duke.R;
-import com.example.duke.helpers.SensorAdapter;
+import com.example.duke.helpers.DeviceAdapter;
 import com.example.duke.model.Sensor;
-import com.example.duke.processes.TestDataLoader;
-import com.example.duke.processes.UDPReceiver;
-import com.example.duke.processes.UDPSender;
 import com.example.duke.viewmodel.SensorViewModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class PrioritiesFragment extends Fragment {
 
-    private static final boolean TEST_MODE = false;
-    private SensorAdapter adapter;
-    private List<Sensor> sensors = new ArrayList<>();
-
-    private SensorViewModel viewModel;
+    private DeviceAdapter adapter;
+    private final List<String> deviceIds = new ArrayList<>();
 
     @Override
     public View onCreateView( @NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState ) {
@@ -37,49 +34,35 @@ public class PrioritiesFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewCreated( @NonNull View view, @Nullable Bundle savedInstanceState ) {
+        super.onViewCreated( view, savedInstanceState );
 
-        RecyclerView recyclerView = view.findViewById( R.id.recyclerViewSensors );
+        RecyclerView recyclerView = view.findViewById( R.id.recyclerViewDevices );
         recyclerView.setLayoutManager( new LinearLayoutManager( requireContext() ) );
-        adapter = new SensorAdapter( sensors );
+
+        adapter = new DeviceAdapter( deviceIds, this::openDevice );
         recyclerView.setAdapter( adapter );
 
-        viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
-
-        viewModel.getLastSensor().observe( getViewLifecycleOwner(), sensor -> {
-            updateSensor( sensor );
-        });
-
-        if ( TEST_MODE ) {
-            loadTestData();
-        }
+        SensorViewModel viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
+        viewModel.getDeviceMap().observe( getViewLifecycleOwner(), this::updateDeviceList );
     }
 
-    private void loadTestData() {
-        String json = TestDataLoader.loadRawJson(requireContext());
-        if (json == null) return;
+    @SuppressLint( "NotifyDataSetChanged" )
+    private void updateDeviceList(Map<String, List<Sensor>> deviceMap ) {
+        deviceIds.clear();
+        deviceIds.addAll( deviceMap.keySet() );
 
-        List<Sensor> testSensors = TestDataLoader.parseAll(json);
-        sensors.addAll( testSensors );
+        Collections.sort( deviceIds );
+
         adapter.notifyDataSetChanged();
     }
 
-    private void updateSensor( Sensor newSensor ) {
-        for ( int i = 0; i < sensors.size(); i++ ) {
-            if ( sensors.get( i ).getNumber() == newSensor.getNumber() ) {
-                sensors.set( i, newSensor );
-                adapter.notifyItemChanged( i );
-                return;
-            }
-        }
-
-        sensors.add( newSensor );
-        adapter.notifyItemInserted( sensors.size() -1 );
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    private void openDevice( String deviceId ) {
+        DeviceSensorsFragment fragment = DeviceSensorsFragment.newInstance( deviceId );
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace( R.id.fragment_container, fragment )
+                .addToBackStack( null )
+                .commit();
     }
 }

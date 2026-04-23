@@ -6,15 +6,12 @@ import com.example.duke.R;
 import com.example.duke.helpers.SensorDataParser;
 import com.example.duke.model.Sensor;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TestDataLoader {
 
@@ -36,18 +33,8 @@ public class TestDataLoader {
         }
     }
 
-    // Parse un tableau JSON → liste de Capteurs
-    public static List<Sensor> parseAll(String json) {
-        List<Sensor> result = new ArrayList<>();
-        try {
-            JSONArray array = new JSONArray(json);
-            for (int i = 0; i < array.length(); i++) {
-                Sensor sensor = SensorDataParser.parse(array.getJSONObject(i).toString());
-                if ( sensor != null) result.add( sensor );
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return result;
+    // Parse un tableau JSON → map deviceId → capteurs
+    public static Map<String, List<Sensor>> parseAll( String json ) {
+        return SensorDataParser.parse( json );
     }
 }

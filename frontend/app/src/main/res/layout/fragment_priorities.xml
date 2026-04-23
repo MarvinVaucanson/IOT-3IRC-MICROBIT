@@ -72,7 +72,7 @@
                 android:layout_marginBottom="16dp"
                 android:fontFamily="@font/space_grotesk"
                 android:gravity="start"
-                android:text="Affichage des données - Serveur :"
+                android:text="Appareils connectés"
                 android:textColor="#E2E2E5"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -84,7 +84,7 @@
                 android:fontFamily="@font/inter"
                 android:gravity="start"
                 android:lineSpacingMultiplier="1.4"
-                android:text="Priorisez la disponibilité des données capteurs pour les environnements à haute latence."
+                android:text="Sélectionnez un appareil pour consulter ses capteurs."
                 android:textColor="#8888AA"
                 android:textSize="14sp" />
 
@@ -95,25 +95,12 @@
                 android:orientation="vertical">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewSensors"
+                    android:id="@+id/recyclerViewDevices"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
             </LinearLayout>
 
-            <!-- BOUTON ENREGISTRER -->
-            <Button
-                android:id="@+id/btnSave"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:backgroundTint="#B0C6FF"
-                android:fontFamily="@font/space_grotesk"
-                android:letterSpacing="0.1"
-                android:text="ENREGISTRER L'ORDRE"
-                android:textColor="#002D6F"
-                android:textSize="16sp"
-                android:textStyle="bold" />
 
 
         </LinearLayout>

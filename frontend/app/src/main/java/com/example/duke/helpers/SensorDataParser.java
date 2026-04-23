@@ -2,34 +2,65 @@ package com.example.duke.helpers;
 
 import com.example.duke.model.Sensor;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class SensorDataParser {
 
-    public static Sensor parse(String raw ) {
+    public static Map<String, List<Sensor>> parse( String raw )
+    {
+        Map<String, List<Sensor>> result = new HashMap<>();
 
         try {
-            JSONObject json = new JSONObject( raw );
+            JSONArray data = new JSONArray( raw );
 
-            String sensor = json.getString( "sensor" ).toUpperCase();
-            String value = String.valueOf( json.getDouble( "value" ) );
-            String unit = json.getString( "unit" );
-            String protocol = json.optString( "protocol", "UDP" );
+            for ( int index = 0; index < data.length(); index++ )
+            {
+                JSONObject obj = data.getJSONObject( index );
 
-            switch ( sensor ) {
-                case "BOU":
-                    return new Sensor( 1, "Boussole", protocol, unit, value );
-                case "ACC":
-                    return new Sensor( 3, "Accéléromètre", protocol, unit, value );
-                case "LUX":
-                    return new Sensor( 4, "Luminosité", protocol, unit, value );
-                default:
-                    return null;
+                String deviceId = obj.optString( "deviceId", "Inconnu" ).toUpperCase();
+                String sensorType = obj.getString( "sensor" ).toUpperCase();
+                String value = String.valueOf( Math.round( obj.getDouble( "value" ) ) );
+                String unit = obj.getString( "unit" );
+                String protocol = obj.optString( "protocol", "UDP" );
+
+                Sensor sensor;
+
+                switch ( sensorType ) {
+                    case "HUMIDITE":
+                        sensor = new Sensor( deviceId, 1, "Humidité", protocol, unit, value );
+                        break;
+                    case "LUMINOSITE":
+                        sensor = new Sensor( deviceId, 4, "Luminosité", protocol, unit, value );
+                        break;
+                    case "TEMPERATURE":
+                        sensor = new Sensor( deviceId, 5, "Température", protocol, unit, value );
+                        break;
+                    default:
+                        sensor = new Sensor( deviceId, 0, sensorType, protocol, unit, value );
+                        break;
+                }
+
+                List<Sensor> sensorsList = result.get( deviceId );
+
+                if ( sensorsList == null ) {
+                    sensorsList = new ArrayList<>();
+                    result.put( deviceId, sensorsList );
+                }
+
+                sensorsList.add( sensor );
             }
+
         } catch ( JSONException e ) {
             throw new RuntimeException( e );
         }
 
+        return result;
     }
 }

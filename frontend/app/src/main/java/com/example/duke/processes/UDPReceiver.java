@@ -6,6 +6,9 @@ import com.example.duke.helpers.SensorDataParser;
 import com.example.duke.model.Sensor;
 import com.example.duke.viewmodel.SensorViewModel;
 
+import java.util.List;
+import java.util.Map;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -14,9 +17,9 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 public class UDPReceiver implements Runnable {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 4096;
     private final SensorViewModel viewModel;
-    private DatagramSocket socket;
+    private final DatagramSocket socket;
     private boolean running = false;
 
     public UDPReceiver( DatagramSocket socket, SensorViewModel viewModel ) {
@@ -46,14 +49,17 @@ public class UDPReceiver implements Runnable {
                 }
 
                 if ( data.startsWith( "[" ) && data.endsWith( "]" ) ) {
-                    Sensor sensor = SensorDataParser.parse( data );
+                    Map<String, List<Sensor>> parsed = SensorDataParser.parse( data );
 
-                    if ( sensor != null ) {
-                        viewModel.postSensor( sensor );
-                        viewModel.postLog(
-                            "[UDP] Reçu : " +
-                            sensor.getValue() + " " + sensor.getUnit() +
-                            " (" + sensor.getName() + ")" );
+                    Log.d( "DEBUG", "Data parsed: " + data );
+
+                    if ( !parsed.isEmpty() ) {
+                        viewModel.postDeviceData( parsed );
+                        for ( Map.Entry<String, List<Sensor>> entry : parsed.entrySet() ) {
+                            viewModel.postLog(
+                                "[UDP] Reçu " + entry.getValue().size() +
+                                " capteur(s) de " + entry.getKey() );
+                        }
                     } else {
                         viewModel.postLog( "[WARN] Paquet JSON invalide : " + data );
                     }

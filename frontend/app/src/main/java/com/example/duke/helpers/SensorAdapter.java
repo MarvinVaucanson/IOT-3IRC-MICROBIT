@@ -22,18 +22,19 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder( @NonNull ViewGroup parent, int viewType ) {
         View view = LayoutInflater.from( parent.getContext() )
                 .inflate( R.layout.item_sensor, parent, false );
         return new ViewHolder( view );
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder( @NonNull ViewHolder holder, int position ) {
         Sensor sensor = sensors.get( position );
-        holder.textViewNumber.setText( String.valueOf( sensor.getNumber() ) );
-        holder.textViewName.setText( String.valueOf( sensor.getName() ) );
-        holder.textViewProtocol.setText( String.valueOf( sensor.getProtocol() ) );
+        holder.textViewPriority.setText( String.valueOf( sensor.getPriority() ) );
+        holder.textViewName.setText( sensor.getName() );
+        holder.textViewProtocol.setText( sensor.getProtocol() );
+        holder.textViewValue.setText( sensor.getValue() + " " + sensor.getUnit() );
     }
 
     @Override
@@ -42,13 +43,14 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewNumber, textViewName, textViewProtocol;
+        TextView textViewPriority, textViewName, textViewProtocol, textViewValue;
 
         ViewHolder( View itemView ) {
             super( itemView );
-            textViewNumber = itemView.findViewById( R.id.textViewNumber );
+            textViewPriority = itemView.findViewById( R.id.textViewPriority );
             textViewName = itemView.findViewById( R.id.textViewName );
             textViewProtocol = itemView.findViewById( R.id.textViewProtocol );
+            textViewValue = itemView.findViewById( R.id.textViewValue );
         }
     }
 }

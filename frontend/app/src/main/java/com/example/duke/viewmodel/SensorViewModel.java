@@ -10,6 +10,10 @@ import com.example.duke.processes.UDPSender;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SensorViewModel extends ViewModel {
 
@@ -17,21 +21,30 @@ public class SensorViewModel extends ViewModel {
     private UDPReceiver udpReceiver;
     private DatagramSocket sharedSocket;
 
-    private final MutableLiveData<Sensor> lastSensor = new MutableLiveData<>();
-    private final MutableLiveData<String> logEntry = new MutableLiveData<>();
+    private final MutableLiveData<Map<String, List<Sensor>>> deviceMap = new MutableLiveData<>( new HashMap<>() );
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>( false );
+    private final MutableLiveData<String> logEntry = new MutableLiveData<>();
+    private final MutableLiveData<Integer> currentServerPort = new MutableLiveData<>();
 
-    public LiveData<Sensor> getLastSensor() { return lastSensor; }
-    public LiveData<String> getLogEntry() { return logEntry; }
+    public LiveData<Map<String, List<Sensor>>> getDeviceMap() { return deviceMap; }
     public LiveData<Boolean> getIsConnected() { return isConnected; }
+    public LiveData<String> getLogEntry() { return logEntry; }
+    public LiveData<Integer> getCurrentServerPort() { return currentServerPort; }
 
-    public void postSensor( Sensor sensor ) { lastSensor.postValue( sensor ); }
+    public void postDeviceData( Map<String, List<Sensor>> incoming ) {
+        Map<String, List<Sensor>> current = new HashMap<>();
+        if ( deviceMap.getValue() != null ) {
+            current.putAll( deviceMap.getValue() );
+        }
+        current.putAll( incoming );
+        deviceMap.postValue( current );
+    }
+
     public void postLog( String entry ) { logEntry.postValue( entry ); }
     public void postConnected( boolean bool ) { isConnected.postValue( bool ); }
 
     public void connectServer( int port, String ip ) {
         stopAll();
-
         try {
             sharedSocket = new DatagramSocket();
 
@@ -40,6 +53,8 @@ public class SensorViewModel extends ViewModel {
 
             new Thread( udpReceiver ).start();
             new Thread( udpSender ).start();
+
+            currentServerPort.postValue( port );
 
             udpSender.sendData( "data" );
 

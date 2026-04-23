@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadFragment( Fragment fragment ) {
+        fragmentManager.popBackStack( null, FragmentManager.POP_BACK_STACK_INCLUSIVE );
         fragmentManager.beginTransaction()
                 .replace( R.id.fragment_container, fragment )
                 .commit();
