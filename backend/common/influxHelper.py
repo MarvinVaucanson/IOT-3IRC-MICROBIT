@@ -54,6 +54,27 @@ def readLastData():
                         })
         return res
 
+def readLastDataForDevice(deviceId):
+    res = []
+    query = f'''
+                        from(bucket: "{bucket}")
+                        |> range(start: -24h) 
+                        |> filter(fn: (r) => r["_measurement"] == "data")
+                        |> filter(fn: (r) => r["deviceId"] == "{deviceId}")
+                        |> last()
+                '''
+    result = client.query_api().query(query)
+
+    for table in result:
+        for record in table.records:
+            res.append({
+                "sensor": record.get_field(),
+                "value": record.get_value(),
+                "unit": UNIT[record.get_field()],
+                "protocol": "UDP",
+            })
+    return res
+
 def getAllDevicesInInflux():
     res = []
     query = f"""

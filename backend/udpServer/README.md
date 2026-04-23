@@ -80,3 +80,29 @@ capteur et pour chaque mesure. Voici un exemple de résultat :
    }
 ]
 ```
+
+### Obtention des dernières mesures d'un capteur spécifique
+Pour ce faire, il faut envoyer la chaine `dataByDevice/<device_id>` où `device_id` est 
+l'id d'un capteur existant. Voici un exemple de résultat :
+```json
+[
+   {
+      "sensor":"humidite",
+      "value":40.708910406252755,
+      "unit":"%",
+      "protocol":"UDP"
+   },
+   {
+      "sensor":"luminosite",
+      "value":745,
+      "unit":"lux",
+      "protocol":"UDP"
+   },
+   {
+      "sensor":"temperature",
+      "value":19.077548737795965,
+      "unit":"\\c2\b0C",
+      "protocol":"UDP"
+   }
+]
+```
