@@ -18,6 +18,7 @@ print(f"Serveur UDP prêt sur le port {UDP_PORT}...")
 
 ROUTES = {
     "hello": printHello,
+    "device": getAllDevices,
     "data": currentData
 }
 

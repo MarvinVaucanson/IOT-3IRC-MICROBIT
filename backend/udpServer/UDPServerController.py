@@ -5,3 +5,6 @@ def printHello():
 
 def currentData():
     return readLastData()
+
+def getAllDevices():
+    return getAllDevicesInInflux()
