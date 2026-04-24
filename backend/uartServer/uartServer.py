@@ -13,6 +13,7 @@ DEVICE_ID_INDEX = 0
 TEMPERATURE_INDEX = 1
 LUMINOSITE_INDEX = 2
 HUMIDITY_INDEX = 3
+PRESSURE_INDEX = 4
 ser = serial.Serial()
 
 
@@ -44,7 +45,7 @@ def sendDataToInflux(string: str):
     print("Sent data : "+str(data))
     writeToInfluxDB(data[DEVICE_ID_INDEX],
                     float(data[TEMPERATURE_INDEX]), float(data[HUMIDITY_INDEX]),
-                    int(data[LUMINOSITE_INDEX]))
+                    int(data[LUMINOSITE_INDEX]), int(data[PRESSURE_INDEX]))
 
 def uart_loop():
     initUART()
@@ -65,7 +66,7 @@ def uart_loop():
             elif stringBegin and "$" in data_str:
                 end = data_str.index("$")
                 res += data_str[:end+1]
-                print("UART DATA:", res)
+                sendDataToInflux(res)
                 res = ""
                 stringBegin = False
 
