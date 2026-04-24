@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "duke"
+rootProject.name = "sensorcommand"
 include(":app")
  

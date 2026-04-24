@@ -60,7 +60,7 @@
                 android:layout_marginBottom="4dp"
                 android:fontFamily="@font/space_grotesk"
                 android:gravity="center"
-                android:text="Duke"
+                android:text="SensorCommand"
                 android:textColor="#E2E2E5"
                 android:textSize="32sp"
                 android:textStyle="bold" />
@@ -108,7 +108,6 @@
                 android:hint="IP du serveur"
                 android:paddingBottom="8dp"
                 android:textColor="#E2E2E5"
-                android:textColorHint="#E2E2E5"
                 android:textSize="18sp" />
 
             <View
