@@ -20,15 +20,17 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 UNIT = {
         "temperature": "°C",
         "humidite": "%",
-        "luminosite": "lux"
+        "luminosite": "lux",
+        "pression": "hPa",
 }
 
-def writeToInfluxDB(device_id: str, temperature: float, humidite: float, luminosite: int):
+def writeToInfluxDB(device_id: str, temperature: float, humidite: float, luminosite: int, pression: int):
     point = Point("data") \
             .tag("deviceId", f"{device_id}") \
             .field("temperature", temperature) \
             .field("humidite", humidite) \
             .field("luminosite", luminosite) \
+            .field("pression", pression) \
             .time(time.time_ns(), WritePrecision.NS)
 
     write_api.write(bucket=bucket, org=org, record=point)
