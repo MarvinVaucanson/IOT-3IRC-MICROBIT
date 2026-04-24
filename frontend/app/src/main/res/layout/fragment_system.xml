@@ -151,10 +151,11 @@
                                     android:textSize="12sp" />
 
                                 <ImageView
+                                    android:id="@+id/imageViewConnectionType"
                                     android:layout_width="24dp"
                                     android:layout_height="24dp"
-                                    android:src="@drawable/ic_wifi"
-                                    app:tint="#00E5CC" />
+                                    android:contentDescription="icon-connection"
+                                    android:src="@drawable/ic_no_connection" />
                             </LinearLayout>
 
                             <TextView
@@ -176,18 +177,21 @@
                                 android:paddingHorizontal="10dp"
                                 android:paddingVertical="4dp">
 
-                                <View
+                                <ImageView
+                                    android:id="@+id/imageViewDot"
                                     android:layout_width="6dp"
                                     android:layout_height="6dp"
                                     android:layout_marginEnd="6dp"
-                                    android:background="@drawable/ic_dot_green" />
+                                    android:background="@drawable/ic_dot_red"
+                                    android:contentDescription="icon-dot" />
 
                                 <TextView
+                                    android:id="@+id/textViewConnectionStatus"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/inter"
-                                    android:text="LIAISON STABLE"
-                                    android:textColor="#00E5CC"
+                                    android:text="NON CONNECTÉ"
+                                    android:textColor="#FF0000"
                                     android:textSize="10sp" />
                             </LinearLayout>
                         </LinearLayout>
@@ -260,6 +264,7 @@
                             android:fontFamily="@font/inter"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="5dp"
+                            android:text="PORT INCONNU"
                             android:textColor="#AAAACC"
                             android:textSize="10sp" />
 

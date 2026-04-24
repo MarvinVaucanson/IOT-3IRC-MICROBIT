@@ -42,6 +42,9 @@ public class SensorDataParser {
                     case "TEMPERATURE":
                         sensor = new Sensor( deviceId, 5, "Température", protocol, unit, value );
                         break;
+                    case "PRESSION":
+                        sensor = new Sensor( deviceId, 6, "Pression", protocol, unit, value );
+                        break;
                     default:
                         sensor = new Sensor( deviceId, 0, sensorType, protocol, unit, value );
                         break;
