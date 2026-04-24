@@ -1,6 +1,8 @@
 import socket
 from UDPServerController import *
 import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 UDP_IP = "0.0.0.0"
 UDP_PORT = 10000
@@ -26,7 +28,10 @@ ROUTES = {
 while True:
     # 3. Réception des données (taille du tampon : 1024 octets)
     data, addr = sock.recvfrom(1024)
-    print("Message reçu de {}: {}".format(addr, data.decode()), flush=True)
+
+    now = datetime.now(ZoneInfo("Europe/Paris"))
+    date = now.strftime("%d-%m-%Y %H:%M:%S")
+    print("{} : Message reçu de {}: {}".format(date, addr, data.decode()), flush=True)
     message = data.decode()
 
     for route, method in ROUTES.items():
