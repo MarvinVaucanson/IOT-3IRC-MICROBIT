@@ -11,6 +11,14 @@ MicroBitI2C myI2C(uBit.io.P2.name, uBit.io.P1.name);
 
 #define OLED_ADDR 0x7A  // Adresse écran OLED
 
+/* --- Structure pour les données des capteurs --- */
+struct SensorData {
+    int temperature;
+    uint32_t pressure;
+    uint16_t humidity;
+    uint32_t light;
+};
+
 /* --- Configuration de l'afficahge --- */
 const char* OBJECT_ID = "01";
 const int SEND_INTERVAL_MS = 1000;
@@ -93,16 +101,27 @@ void initOLED()
     sendCommand(0xAF);
 }
 
-/* --- Mise à jour affichage écran --- */
-void updateSensorDisplay(bme280 &bme, tsl256x &tsl) {
-    int32_t temp;
+/* --- Lecture des capteurs --- */
+SensorData readSensors(bme280 &bme, tsl256x &tsl) {
+    SensorData data;
+
+    int32_t temp_raw;
     uint32_t pressure, light;
     uint16_t humidity;
 
-    // Lecture des capteurs
-    bme.sensor_read(&pressure, &temp, &humidity);
+    bme.sensor_read(&pressure, &temp_raw, &humidity);
     tsl.sensor_read(NULL, NULL, &light);
 
+    data.temperature = bme.compensate_temperature(temp_raw);
+    data.humidity = bme.compensate_humidity(humidity);
+    data.pressure = pressure;
+    data.light = light;
+
+    return data;
+}
+
+/* --- Mise à jour affichage écran --- */
+void updateSensorDisplay(SensorData data) {
     clearOLED();
     int current_page = 0;
 
@@ -114,18 +133,16 @@ void updateSensorDisplay(bme280 &bme, tsl256x &tsl) {
         char sensorType = display_order[i];
 
         if (sensorType == 'T') {
-            int tmp = bme.compensate_temperature(temp);
-            sprintf(line_buffer, "Temp: %d.%02d C", tmp/100, abs(tmp%100));
+            sprintf(line_buffer, "Temp: %d.%02d C", data.temperature/100, abs(data.temperature%100));
         } 
         else if (sensorType == 'L') {
-            sprintf(line_buffer, "Lumiere: %u lux", (unsigned int)light);
+            sprintf(line_buffer, "Lumiere: %u lux", (unsigned int)data.light);
         } 
         else if (sensorType == 'P') {
-            sprintf(line_buffer, "Pression: %u hPa", (unsigned int)pressure);
+            sprintf(line_buffer, "Pression: %u hPa", (unsigned int)data.pressure);
         } 
         else if (sensorType == 'H') {
-            int hum = bme.compensate_humidity(humidity);
-            sprintf(line_buffer, "Humidite: %d.%02d %%", hum/100, hum%100);
+            sprintf(line_buffer, "Humidite: %d.%02d %%", data.humidity/100, data.humidity%100);
         }
 
         printText(line_buffer, 0, current_page);
@@ -141,7 +158,7 @@ void onData(MicroBitEvent)
         uBit.display.print("P");            // feedback visuel
         int result = uBit.radio.datagram.send("PONG");   // réponse
     if (result == MICROBIT_OK)
-        uBit.display.scroll("SENT");
+        uBit.display.scroll("SENT-2");
     }
 
 }
@@ -149,7 +166,7 @@ void onData(MicroBitEvent)
 int main()
 {
     uBit.init();
-    uBit.radio.setGroup(42);
+    uBit.radio.setGroup(41);
     uBit.radio.setTransmitPower(7);
     uBit.radio.enable();
 
@@ -165,6 +182,8 @@ int main()
     tsl256x tsl(&uBit, &myI2C, 0x52);
 
     int last_time = 0;
+
+    int deviceId = 1; // ID de l'appareil, à personnaliser pour chaque micro:bit
 
     printText("Init...", 0, 0);
     uBit.sleep(1000);
@@ -182,24 +201,38 @@ int main()
         if (current_time - last_time >= SEND_INTERVAL_MS || last_time == 0) {
             last_time = current_time;
             
-            updateSensorDisplay(bme, tsl);
+            SensorData data = readSensors(bme, tsl);
+
+            updateSensorDisplay(data);
+
+            // &<deviceId>|<temperature>|<luminosite>|<humidite>|<pressure>$
+            char buffer[100];
+            sprintf(buffer, "&%d|%d.%02d|%lu|%d.%02d|%lu$",
+                deviceId,
+                data.temperature / 100,
+                abs(data.temperature % 100),
+                data.light,
+                data.humidity/100, 
+                data.humidity%100,
+                data.pressure
+            );
+    
+            int result = uBit.radio.datagram.send(buffer);
+    
+            if (result == MICROBIT_OK)
+                uBit.display.scroll("SENT");
+            else if (result == MICROBIT_INVALID_PARAMETER)
+                uBit.display.scroll("ERR_PARAM");
+            else if (result == MICROBIT_NOT_SUPPORTED){
+                uBit.display.scroll("ERR_RADIO");
+                uBit.display.scroll(ManagedString(result));
+            }
+            else
+                uBit.display.scroll(ManagedString(result));
         }
 
-        // &<deviceId>|<temperature>|<luminosite>|<humidite>|<pressure>$
-        int result = uBit.radio.datagram.send("PONG");   // send
-
-        if (result == MICROBIT_OK)
-            uBit.display.scroll("SENT");
-        else if (result == MICROBIT_INVALID_PARAMETER)
-            uBit.display.scroll("ERR_PARAM");
-        else if (result == MICROBIT_NOT_SUPPORTED){
-            uBit.display.scroll("ERR_RADIO");
-            uBit.display.scroll(ManagedString(result));
-        }
-        else
-            uBit.display.scroll(ManagedString(result));
         
-        uBit.sleep(3000);
+        uBit.sleep(6000);
     }
 
     release_fiber();
