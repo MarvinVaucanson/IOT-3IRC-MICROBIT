@@ -65,7 +65,7 @@ def uart_loop():
             elif stringBegin and "$" in data_str:
                 end = data_str.index("$")
                 res += data_str[:end+1]
-                print("UART DATA:", res)
+                sendDataToInflux(res)
                 res = ""
                 stringBegin = False
 
