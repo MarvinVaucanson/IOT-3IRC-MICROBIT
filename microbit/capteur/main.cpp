@@ -140,8 +140,8 @@ void onData(MicroBitEvent)
     {
         uBit.display.print("P");            // feedback visuel
         int result = uBit.radio.datagram.send("PONG");   // réponse
-        if (result == MICROBIT_OK)
-            uBit.display.scroll("SENT");
+    if (result == MICROBIT_OK)
+        uBit.display.scroll("SENT");
     }
 
 }
@@ -184,6 +184,20 @@ int main()
             
             updateSensorDisplay(bme, tsl);
         }
+
+        // &<deviceId>|<temperature>|<luminosite>|<humidite>|<pressure>$
+        int result = uBit.radio.datagram.send("PONG");   // send
+
+        if (result == MICROBIT_OK)
+            uBit.display.scroll("SENT");
+        else if (result == MICROBIT_INVALID_PARAMETER)
+            uBit.display.scroll("ERR_PARAM");
+        else if (result == MICROBIT_NOT_SUPPORTED){
+            uBit.display.scroll("ERR_RADIO");
+            uBit.display.scroll(ManagedString(result));
+        }
+        else
+            uBit.display.scroll(ManagedString(result));
         
         uBit.sleep(3000);
     }
