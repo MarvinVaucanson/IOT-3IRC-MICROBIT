@@ -45,9 +45,9 @@ void onSerialData(MicroBitEvent)
     
     uBit.serial.printf("RX SERIAL : %s\n", s.toCharArray());
     
-    if(verifyDataStruct(s)){
+    if(verifyDataStructParam(s)){
         // Faire quelque chose avec les données
-        uBit.radio.send(s)
+        uBit.radio.datagram.send(s)
         uBit.display.scroll("SERIE-RECV");
     }   
 }
