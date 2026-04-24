@@ -1,12 +1,12 @@
 package com.example.duke.model;
 
 public class Sensor {
-    private String deviceId;
-    private int priority;
-    private String name;
-    private String protocol;
-    private String unit;
-    private String value;
+    private final String deviceId;
+    private final int priority;
+    private final String name;
+    private final String protocol;
+    private final String unit;
+    private final String value;
 
     public Sensor( String deviceId, int priority, String name, String protocol, String unit, String value ) {
         this.deviceId = deviceId;

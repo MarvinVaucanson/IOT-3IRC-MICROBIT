@@ -1,5 +1,7 @@
 package com.example.duke.processes;
 
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.example.duke.helpers.SensorDataParser;
@@ -42,23 +44,25 @@ public class UDPReceiver implements Runnable {
 
                 String data = new String( packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8 ).trim();
 
-                Log.d( "DEBUG", "Received: " + data );
-
                 if ( data.isEmpty() || data.equals( "[]" ) ) {
                     continue;
                 }
 
-                if ( data.startsWith( "[" ) && data.endsWith( "]" ) ) {
-                    Map<String, List<Sensor>> parsed = SensorDataParser.parse( data );
+                if ( data.startsWith( "[" ) && data.endsWith( "]" ) )
+                {
+                    Map<String, List<Sensor>> parsedData = SensorDataParser.parse( data );
 
                     Log.d( "DEBUG", "Data parsed: " + data );
 
-                    if ( !parsed.isEmpty() ) {
-                        viewModel.postDeviceData( parsed );
-                        for ( Map.Entry<String, List<Sensor>> entry : parsed.entrySet() ) {
+                    if ( !parsedData.isEmpty() )
+                    {
+                        viewModel.postDeviceData( parsedData );
+
+                        for ( Map.Entry<String, List<Sensor>> deviceEntry : parsedData.entrySet() ) {
                             viewModel.postLog(
-                                "[UDP] Reçu " + entry.getValue().size() +
-                                " capteur(s) de " + entry.getKey() );
+                                "[UDP] Reçu " + deviceEntry.getValue().size() +
+                                " capteur" + ( deviceEntry.getValue().size() > 1 ? "s" : "" ) +
+                                " de " + deviceEntry.getKey() );
                         }
                     } else {
                         viewModel.postLog( "[WARN] Paquet JSON invalide : " + data );

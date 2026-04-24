@@ -21,14 +21,14 @@ import com.example.duke.viewmodel.SensorViewModel;
 public class ServersFragment extends Fragment {
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_servers, container, false);
+    public View onCreateView( LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState ) {
+        return inflater.inflate( R.layout.fragment_servers, container, false );
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onViewCreated( @NonNull View view, @Nullable Bundle savedInstanceState ) {
+        super.onViewCreated( view, savedInstanceState );
 
         EditText editPort = view.findViewById( R.id.editPort );
         EditText editServerAddress = view.findViewById( R.id.editServerAddress );

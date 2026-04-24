@@ -14,7 +14,7 @@ import com.example.duke.model.Sensor;
 import java.util.List;
 
 public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder> {
-    private List<Sensor> sensors;
+    private final List<Sensor> sensors;
 
     public SensorAdapter( List<Sensor> sensors ) {
         this.sensors = sensors;

@@ -12,9 +12,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class UDPSender implements Runnable {
     private final int PORT;
     private final String IP_HOST;
+    private final DatagramSocket socket;
     private final SensorViewModel viewModel;
     private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
-    private DatagramSocket socket;
     private boolean running = false;
 
     public UDPSender( int port, String ip_host, DatagramSocket socket, SensorViewModel viewModel ) {

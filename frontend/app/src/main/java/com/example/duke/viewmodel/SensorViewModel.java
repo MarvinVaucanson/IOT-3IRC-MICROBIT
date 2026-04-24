@@ -1,5 +1,7 @@
 package com.example.duke.viewmodel;
 
+import android.os.Looper;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -15,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.os.Handler;
+
 public class SensorViewModel extends ViewModel {
 
     private UDPSender udpSender;
@@ -22,31 +26,44 @@ public class SensorViewModel extends ViewModel {
     private DatagramSocket sharedSocket;
 
     private final MutableLiveData<Map<String, List<Sensor>>> deviceMap = new MutableLiveData<>( new HashMap<>() );
+    private final MutableLiveData<List<String>> logListEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>( false );
-    private final MutableLiveData<String> logEntry = new MutableLiveData<>();
     private final MutableLiveData<Integer> currentServerPort = new MutableLiveData<>();
 
     public LiveData<Map<String, List<Sensor>>> getDeviceMap() { return deviceMap; }
+    public LiveData<List<String>> getListEntries() { return logListEntries; }
     public LiveData<Boolean> getIsConnected() { return isConnected; }
-    public LiveData<String> getLogEntry() { return logEntry; }
     public LiveData<Integer> getCurrentServerPort() { return currentServerPort; }
 
-    public void postDeviceData( Map<String, List<Sensor>> incoming ) {
+    public void postDeviceData( Map<String, List<Sensor>> incomingData ) {
         Map<String, List<Sensor>> current = new HashMap<>();
         if ( deviceMap.getValue() != null ) {
             current.putAll( deviceMap.getValue() );
         }
-        current.putAll( incoming );
+
+        current.putAll( incomingData );
         deviceMap.postValue( current );
     }
 
-    public void postLog( String entry ) { logEntry.postValue( entry ); }
+    public void postLog( String message ) {
+        new Handler( Looper.getMainLooper() ).post( () ->
+        {
+            List<String> current = logListEntries.getValue();
+
+            if ( current == null ) current = new ArrayList<>();
+
+            List<String> updated = new ArrayList<>( current );
+            updated.add( message );
+
+            logListEntries.setValue( updated );
+        } );
+    }
     public void postConnected( boolean bool ) { isConnected.postValue( bool ); }
 
     public void connectServer( int port, String ip ) {
         stopAll();
         try {
-            sharedSocket = new DatagramSocket();
+            sharedSocket = new DatagramSocket( port );
 
             udpReceiver = new UDPReceiver( sharedSocket, this );
             udpSender = new UDPSender( port, ip, sharedSocket, this );
@@ -61,15 +78,6 @@ public class SensorViewModel extends ViewModel {
         } catch ( SocketException e ) {
             postLog( "[ERR] Impossible de créer le socket : " + e.getMessage() );
             postConnected( false );
-        }
-    }
-
-    public void sendCommand( String command ) {
-        if ( udpSender != null ) {
-            udpSender.sendData( command );
-            postLog( "[SYS] Commande envoyée : " + command );
-        } else {
-            postLog( "[WARN] Pas de connexion active" );
         }
     }
 

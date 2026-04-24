@@ -48,7 +48,7 @@ public class PrioritiesFragment extends Fragment {
     }
 
     @SuppressLint( "NotifyDataSetChanged" )
-    private void updateDeviceList(Map<String, List<Sensor>> deviceMap ) {
+    private void updateDeviceList( Map<String, List<Sensor>> deviceMap ) {
         deviceIds.clear();
         deviceIds.addAll( deviceMap.keySet() );
 

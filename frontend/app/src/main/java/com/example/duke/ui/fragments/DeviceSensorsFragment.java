@@ -26,10 +26,9 @@ import java.util.Map;
 public class DeviceSensorsFragment extends Fragment {
 
     private static final String DEVICE_ID = "deviceId";
-
+    private final List<Sensor> sensors = new ArrayList<>();
     private String deviceId;
     private SensorAdapter adapter;
-    private final List<Sensor> sensors = new ArrayList<>();
 
     public static DeviceSensorsFragment newInstance( String deviceId ) {
         DeviceSensorsFragment fragment = new DeviceSensorsFragment();
@@ -62,7 +61,7 @@ public class DeviceSensorsFragment extends Fragment {
         TextView subtitleView = view.findViewById( R.id.textViewDeviceSubtitle );
         ImageView btnBack = view.findViewById( R.id.btnBack );
 
-        titleView.setText( "DEVICE / " + deviceId );
+        titleView.setText( "MICROBIT / " + deviceId );
         subtitleView.setText( deviceId.toUpperCase() );
 
         btnBack.setOnClickListener( v -> requireActivity().getSupportFragmentManager().popBackStack() );

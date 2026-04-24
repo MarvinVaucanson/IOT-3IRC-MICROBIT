@@ -97,7 +97,6 @@
                     android:layout_marginBottom="16dp"
                     android:fontFamily="@font/inter"
                     android:gravity="center"
-                    android:text="0x442F"
                     android:textColor="#B0C6FF"
                     android:textSize="12sp" />
 
