@@ -1,13 +1,18 @@
-"""Ceci est le code d'envoie et d'attente de réponse (gate)"""
+/*Ceci est le code d'envoie et d'attente de réponse (gate)*/
 #include "MicroBit.h"
+#include "MicroBitUARTService.h"
 
 MicroBit uBit;
+MicroBitUARTService *uart;
 
 void onData(MicroBitEvent)
 {
     ManagedString s = uBit.radio.datagram.recv();
 
     uBit.serial.printf("RX : %s", s.toCharArray());
+
+    uart.send(s);
+    uart.send("toto");
 
     if (s == "PONG")
         uBit.display.scroll("OK");
@@ -19,6 +24,8 @@ int main()
 {
     // Initialise the micro:bit runtime.
     uBit.init();
+
+    uart = new MicroBitUARTService(*uBit.ble,32,32);
 
     uBit.radio.setGroup(42);
     uBit.radio.setTransmitPower(7);
