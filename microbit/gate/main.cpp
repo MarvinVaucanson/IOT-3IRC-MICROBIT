@@ -19,7 +19,9 @@ void onData(MicroBitEvent)
 
     uBit.serial.printf("RX : %s", s.toCharArray());
 
-    uBit.serial.send(s);
+    if(verifyDataStruct(s)){
+        uBit.serial.send(s);
+    }
 
     // DEBUG
     // if (s == "PONG")
@@ -48,6 +50,9 @@ int main()
     {
         // VVVVVVVVV Here insert if you whant to send data to capteur
 
+        // ManagedString s = uBit.serial.recv()
+
+        
         // DEBUG
         // uBit.serial.printf("SEND: %d\n", result);
     
