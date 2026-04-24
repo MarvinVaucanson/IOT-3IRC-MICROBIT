@@ -13,6 +13,15 @@ bool verifyDataStruct(ManagedString s)
     return (s.charAt(0) == '&' && s.charAt(s.length() - 1) == '$');
 }
 
+bool verifyDataStructParam(ManagedString s)
+{
+    if (s.length() < 2) {
+        return false;
+    }
+    
+    return (s.charAt(0) == '@' && s.charAt(s.length() - 1) == '\n');
+}
+
 void onData(MicroBitEvent)
 {
     ManagedString s = uBit.radio.datagram.recv();
@@ -28,6 +37,19 @@ void onData(MicroBitEvent)
     //     uBit.display.scroll("OK");
     // else
     //     uBit.display.scroll(s);
+}
+
+void onSerialData(MicroBitEvent)
+{
+    ManagedString s = uBit.serial.readUntil('\n'); //change end char
+    
+    uBit.serial.printf("RX SERIAL : %s\n", s.toCharArray());
+    
+    if(verifyDataStruct(s)){
+        // Faire quelque chose avec les données
+        uBit.radio.send(s)
+        uBit.display.scroll("SERIE-RECV");
+    }   
 }
 
 int main()
@@ -48,11 +70,8 @@ int main()
 
     while(1)
     {
-        // VVVVVVVVV Here insert if you whant to send data to capteur
+        // VVVVVVVVV Here insert if you whant to send data to capteur        
 
-        // ManagedString s = uBit.serial.recv()
-
-        
         // DEBUG
         // uBit.serial.printf("SEND: %d\n", result);
     
