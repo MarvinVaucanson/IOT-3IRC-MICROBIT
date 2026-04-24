@@ -106,3 +106,13 @@ l'id d'un capteur existant. Voici un exemple de résultat :
    }
 ]
 ```
+
+
+### Configuration des écrans des micro:bit
+Pour ce faire il faut envoyer le message `configScreen/<office_id>:<config>` où 
+`device_id` est l'id d'un capteur existant. `config` est la configuration de l'écran 
+sur 3 lettres (T, L et H). Leur ordre définie l'ordre d'affichage des différentes 
+mesures sur l'écran de la micro:bit.
+T = Température  
+L = Luminosité  
+H = Humidité  

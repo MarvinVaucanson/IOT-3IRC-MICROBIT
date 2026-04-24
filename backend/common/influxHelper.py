@@ -23,9 +23,9 @@ UNIT = {
         "luminosite": "lux"
 }
 
-def writeToInfluxDB(office_number: int, temperature: float, humidite: float, luminosite: int):
+def writeToInfluxDB(device_id: str, temperature: float, humidite: float, luminosite: int):
     point = Point("data") \
-            .tag("deviceId", f"office_0{office_number}") \
+            .tag("deviceId", f"{device_id}") \
             .field("temperature", temperature) \
             .field("humidite", humidite) \
             .field("luminosite", luminosite) \
