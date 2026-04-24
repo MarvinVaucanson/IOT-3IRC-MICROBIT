@@ -19,7 +19,7 @@ void onData(MicroBitEvent)
 
     uBit.serial.printf("RX : %s", s.toCharArray());
 
-    uart.serial.send(s);
+    uBit.serial.send(s);
 
     // DEBUG
     // if (s == "PONG")

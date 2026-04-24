@@ -1,9 +1,17 @@
 /*Ceci est le code d'envoie et d'attente de réponse (gate)*/
 #include "MicroBit.h"
-#include "MicroBitUARTService.h"
+#include "stdbool.h"
 
 MicroBit uBit;
-MicroBitUARTService *uart;
+
+bool verifyDataStruct(ManagedString s)
+{
+    if (s.length() < 2) {
+        return false;
+    }
+    
+    return (s.charAt(0) == '&' && s.charAt(s.length() - 1) == '$');
+}
 
 void onData(MicroBitEvent)
 {
@@ -11,21 +19,19 @@ void onData(MicroBitEvent)
 
     uBit.serial.printf("RX : %s", s.toCharArray());
 
-    uart->send(s);
-    uart->send(ManagedString("toto"));
+    uBit.serial.send(s);
 
-    if (s == "PONG")
-        uBit.display.scroll("OK");
-    else
-        uBit.display.scroll(s);
+    // DEBUG
+    // if (s == "PONG")
+    //     uBit.display.scroll("OK");
+    // else
+    //     uBit.display.scroll(s);
 }
 
 int main()
 {
     // Initialise the micro:bit runtime.
     uBit.init();
-
-    uart = new MicroBitUARTService(*uBit.ble,32,32);
 
     uBit.radio.setGroup(42);
     uBit.radio.setTransmitPower(7);
@@ -40,20 +46,22 @@ int main()
 
     while(1)
     {
-        int result = uBit.radio.datagram.send("PING");
+        // VVVVVVVVV Here insert if you whant to send data to capteur
 
-        uBit.serial.printf("SEND: %d\n", result);
+        // DEBUG
+        // uBit.serial.printf("SEND: %d\n", result);
     
-        if (result == MICROBIT_OK)
-            uBit.display.scroll("SENT");
-        else if (result == MICROBIT_INVALID_PARAMETER)
-            uBit.display.scroll("ERR_PARAM");
-        else if (result == MICROBIT_NOT_SUPPORTED){
-            uBit.display.scroll("ERR_RADIO");
-            uBit.display.scroll(ManagedString(result));
-        }
-        else
-            uBit.display.scroll(ManagedString(result));
-        uBit.sleep(6000);    
+        // if (result == MICROBIT_OK)
+        //     uBit.display.scroll("SENT");
+        // else if (result == MICROBIT_INVALID_PARAMETER)
+        //     uBit.display.scroll("ERR_PARAM");
+        // else if (result == MICROBIT_NOT_SUPPORTED){
+        //     uBit.display.scroll("ERR_RADIO");
+        //     uBit.display.scroll(ManagedString(result));
+        // }
+        // else
+        //     uBit.display.scroll(ManagedString(result));
+
+        // uBit.sleep(5000);    
     }
 }
