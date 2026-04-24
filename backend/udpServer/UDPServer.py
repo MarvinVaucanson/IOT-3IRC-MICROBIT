@@ -1,11 +1,20 @@
+import os
 import socket
 from UDPServerController import *
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from dotenv import load_dotenv
+from pathlib import Path
+import nacl.secret
+import nacl.utils
+
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 UDP_IP = "0.0.0.0"
 UDP_PORT = 10000
+ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 
 def sendData(message: str, addr: tuple):
     data = message.encode("utf-8")
@@ -15,15 +24,26 @@ def sendData(message: str, addr: tuple):
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 sock.bind((UDP_IP, UDP_PORT))
+secretBox = nacl.secret.SecretBox(ENCRYPTION_KEY.encode())
 
-print(f"Serveur UDP prêt sur le port {UDP_PORT}...")
+def ping():
+    message = "pong"
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+    data = message.encode("utf-8")
+    encryptedData = secretBox.encrypt(data, nonce)
+    print("Encypted : " + str(encryptedData), flush=True)
+    sock.sendto(encryptedData, addr)
+
+
+print(f"Serveur UDP prêt sur le port {UDP_PORT}...", flush=True)
 
 ROUTES = {
     "hello": printHello,
     "device": getAllDevices,
     "dataByDevice/": getDataByDevice,
     "configScreen/": setScreenConfig,
-    "data": currentData
+    "data": currentData,
+    "ping": ping
 }
 
 while True:
@@ -36,7 +56,10 @@ while True:
     message = data.decode()
 
     for route, method in ROUTES.items():
-        if message == route:
+        if message == "ping":
+            ping()
+            break
+        elif message == route:
             data = method()
             sendData(json.dumps(data, ensure_ascii=False), addr)
         elif route[-1] == "/" and message.startswith(route):
