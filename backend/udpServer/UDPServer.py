@@ -22,6 +22,7 @@ ROUTES = {
     "hello": printHello,
     "device": getAllDevices,
     "dataByDevice/": getDataByDevice,
+    "configScreen/": setScreenConfig,
     "data": currentData
 }
 

@@ -1,4 +1,6 @@
 import serial
+import threading
+import socket
 
 from backend.common.influxHelper import writeToInfluxDB
 
@@ -44,33 +46,54 @@ def sendDataToInflux(string: str):
                     float(data[TEMPERATURE_INDEX]), float(data[HUMIDITY_INDEX]),
                     int(data[LUMINOSITE_INDEX]))
 
-
-# Main program logic follows:
-if __name__ == '__main__':
+def uart_loop():
     initUART()
-    print('Press Ctrl-C to quit.', flush=True)
+
     res = ""
     stringBegin = False
 
-    try:
-        while ser.isOpen():
-            # time.sleep(100)
-            if (ser.inWaiting() > 0):  # if incoming bytes are waiting
-                data_bytes = ser.read(ser.inWaiting())
-                data_str = data_bytes.decode()
+    while True:
+        if ser.inWaiting() > 0:
+            data_bytes = ser.read(ser.inWaiting())
+            data_str = data_bytes.decode()
 
-                if not stringBegin and START_CHAR in data_str:
-                    startCharIndex = data_str.index(START_CHAR)
-                    res += data_str[startCharIndex:]
-                    stringBegin = True
-                elif stringBegin and END_CHAR in data_str:
-                    endCharIndex = data_str.index(END_CHAR)
-                    res += data_str[:endCharIndex+1]
-                    sendDataToInflux(res)
-                    res = ""
-                    stringBegin = False
-                elif stringBegin:
-                    res += data_str
-    except (KeyboardInterrupt, SystemExit):
-        ser.close()
-        exit()
+            if not stringBegin and "&" in data_str:
+                start = data_str.index("&")
+                res += data_str[start:]
+                stringBegin = True
+
+            elif stringBegin and "$" in data_str:
+                end = data_str.index("$")
+                res += data_str[:end+1]
+                print("UART DATA:", res)
+                res = ""
+                stringBegin = False
+
+            elif stringBegin:
+                res += data_str
+
+def udp_loop():
+    UDP_IP = "0.0.0.0"
+    UDP_PORT = 11000
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((UDP_IP, UDP_PORT))
+
+    print("UDP ready...")
+
+    while True:
+        data, addr = sock.recvfrom(1024)
+        msg = data.decode()
+
+        sendUARTMessage(msg)
+
+# Main program logic follows:
+if __name__ == '__main__':
+    t1 = threading.Thread(target=uart_loop)
+    t2 = threading.Thread(target=udp_loop)
+
+    t1.start()
+    t2.start()
+
+    t1.join()
+    t2.join()
