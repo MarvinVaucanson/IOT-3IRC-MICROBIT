@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.sensorcommand.R;
 import com.example.sensorcommand.viewmodel.SensorViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -215,10 +216,11 @@ public class SystemFragment extends Fragment {
             viewModel.postLog( "[SYS] Déconnexion demandée par l'utilisateur" );
             viewModel.postConnected( false );
 
-            getParentFragmentManager().beginTransaction()
-                    .replace( R.id.fragment_container, new ServersFragment() )
-                    .addToBackStack( null )
-                    .commit();
+            BottomNavigationView bottomNav = requireActivity().findViewById( R.id.bottom_nav );
+
+            if ( bottomNav != null ) {
+                bottomNav.setSelectedItemId( R.id.nav_servers );
+            }
 
             stopSync();
 
@@ -235,13 +237,10 @@ public class SystemFragment extends Fragment {
         syncRunnable = new Runnable() {
             @Override
             public void run() {
-                secondsAgo++;
                 textViewLastSync.setText( "Il y a " + secondsAgo + " seconde" + ( secondsAgo > 1 ? "s" : "" ) );
-                handler.postDelayed( this, 10000 );
             }
         };
 
-        handler.postDelayed( syncRunnable, 10000 );
     }
 
     private void stopSync() {
