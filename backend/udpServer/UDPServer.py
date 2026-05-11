@@ -17,8 +17,10 @@ UDP_PORT = 10000
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 
 def sendData(message: str, addr: tuple):
+    nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
     data = message.encode("utf-8")
-    sock.sendto(data, addr)
+    encryptedData = secretBox.encrypt(data, nonce)
+    sock.sendto(encryptedData, addr)
 
 # AF_INET = IPv4 | SOCK_DGRAM = UDP
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

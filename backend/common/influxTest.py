@@ -33,7 +33,7 @@ try:
         
         # Création du point de donnée avec Tags (pour le multi-objet)
         point = Point("data") \
-            .tag("deviceId", f"microbit_0{office_number}") \
+            .tag("deviceId", f"{office_number}") \
             .field("temperature", temperature) \
             .field("humidite", humidite) \
             .field("luminosite", luminosite) \
