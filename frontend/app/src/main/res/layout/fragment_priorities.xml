@@ -78,13 +78,13 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/textViewSelectDevices"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
                 android:fontFamily="@font/inter"
                 android:gravity="start"
                 android:lineSpacingMultiplier="1.4"
-                android:text="Sélectionnez un appareil pour consulter ses capteurs."
                 android:textColor="#8888AA"
                 android:textSize="14sp" />
 
