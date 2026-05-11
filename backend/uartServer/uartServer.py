@@ -1,6 +1,7 @@
 import serial
 import threading
 import socket
+import re
 
 from backend.common.influxHelper import writeToInfluxDB
 
@@ -14,6 +15,9 @@ TEMPERATURE_INDEX = 1
 LUMINOSITE_INDEX = 2
 HUMIDITY_INDEX = 3
 PRESSURE_INDEX = 4
+REGEX_DATA = r"&[A-Za-z0-9_]+\|(([0-9]+\.?){1,2}\|){2}([0-9]+\.?){1,2}\|[0-9]{1,9}\$"
+
+
 ser = serial.Serial()
 
 
@@ -42,11 +46,14 @@ def sendUARTMessage(msg):
     print("Message <" + messageToSent + "> sent to micro-controller.")
 
 def sendDataToInflux(string: str):
-    data = string[1:len(string)-1].split("|")
-    print("Sent data : "+str(data))
-    writeToInfluxDB(data[DEVICE_ID_INDEX],
-                    float(data[TEMPERATURE_INDEX]), float(data[HUMIDITY_INDEX]),
-                    int(data[LUMINOSITE_INDEX]), int(data[PRESSURE_INDEX]))
+    if(re.search(REGEX_DATA, string)):
+        data = string[1:len(string) - 1].split("|")
+        print("Sent data : " + str(data))
+        writeToInfluxDB(data[DEVICE_ID_INDEX],
+                        float(data[TEMPERATURE_INDEX]), float(data[HUMIDITY_INDEX]),
+                        int(data[LUMINOSITE_INDEX]), int(data[PRESSURE_INDEX]))
+    else:
+        print("Format de données non valide : " + string)
 
 def uart_loop():
     initUART()
