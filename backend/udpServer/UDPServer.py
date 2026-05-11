@@ -1,13 +1,11 @@
-import os
-import socket
+import os, socket, json, nacl.secret, nacl.utils
+
 from UDPServerController import *
-import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 from pathlib import Path
-import nacl.secret
-import nacl.utils
+
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)

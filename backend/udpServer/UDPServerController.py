@@ -1,7 +1,7 @@
+import os, socket
+
 from common.influxHelper import *
-import socket
 from dotenv import load_dotenv
-import os
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)

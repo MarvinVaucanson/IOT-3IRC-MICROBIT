@@ -1,10 +1,9 @@
-import time
-import random
+import time, random, os
+from pathlib import Path
+from dotenv import load_dotenv
+
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
-import os
-from dotenv import load_dotenv
-from pathlib import Path
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
