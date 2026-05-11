@@ -1,5 +1,6 @@
 package com.example.sensorcommand;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +28,8 @@ public class MainActivity extends AppCompatActivity {
         loadFragment( new ServersFragment() );
         bottomNav.setSelectedItemId( R.id.nav_servers );
 
-        bottomNav.setOnItemSelectedListener(item -> {
+        bottomNav.setOnItemSelectedListener(item ->
+        {
             Fragment selected;
 
             if ( item.getItemId() == R.id.nav_servers ) {
