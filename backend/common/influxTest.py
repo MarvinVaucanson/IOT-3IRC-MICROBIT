@@ -26,13 +26,13 @@ try:
         humidite = random.uniform(40.0, 60.0)    # [cite: 39]
         luminosite = random.randint(200, 800)    # [cite: 39]
 
-        office_number = random.randint(1, 4)
+        device_number = random.randint(1, 4)
 
         pression = random.randint(100_000, 1_000_000)
         
         # Création du point de donnée avec Tags (pour le multi-objet)
         point = Point("data") \
-            .tag("deviceId", f"{office_number}") \
+            .tag("deviceId", f"{device_number}") \
             .field("temperature", temperature) \
             .field("humidite", humidite) \
             .field("luminosite", luminosite) \
@@ -42,7 +42,7 @@ try:
         # Écriture dans InfluxDB
         write_api.write(bucket=bucket, org=org, record=point)
         
-        print(f"✅ Données envoyées : T={temperature:.2f}°C, H={humidite:.2f}%, L={luminosite}, P={pression}hPa pour office_0{office_number}")
+        print(f"✅ Données envoyées : T={temperature:.2f}°C, H={humidite:.2f}%, L={luminosite}, P={pression}hPa pour le device {device_number}")
         
         # Attendre 5 secondes avant le prochain envoi
         time.sleep(1)
