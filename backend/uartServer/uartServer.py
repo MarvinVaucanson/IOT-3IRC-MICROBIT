@@ -38,7 +38,7 @@ def initUART():
 
 def sendUARTMessage(msg):
     messageToSent = f"{START_CHAR}{msg}{END_CHAR}"
-    #ser.write(messageToSent.encode())
+    ser.write(messageToSent.encode())
     print("Message <" + messageToSent + "> sent to micro-controller.")
 
 def sendDataToInflux(string: str):
