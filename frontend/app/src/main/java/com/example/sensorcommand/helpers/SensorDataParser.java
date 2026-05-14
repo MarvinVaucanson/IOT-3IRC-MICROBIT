@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class SensorDataParser {
 
+    // Convertit un tableau JSON brut en une map associant chaque appareil à sa liste de capteurs
     public static Map<String, List<Sensor>> parse( String raw )
     {
         Map<String, List<Sensor>> result = new HashMap<>();
@@ -24,6 +25,7 @@ public class SensorDataParser {
             {
                 JSONObject obj = data.getJSONObject( index );
 
+                // Extraire les champs de chaque entrée JSON
                 String deviceId = obj.optString( "deviceId", "Inconnu" ).toUpperCase();
                 String sensorType = obj.getString( "sensor" ).toUpperCase();
                 String value = String.valueOf( Math.round( obj.getDouble( "value" ) ) );
@@ -32,6 +34,7 @@ public class SensorDataParser {
 
                 Sensor sensor;
 
+                // Associer chaque type de capteur à sa priorité d'affichage
                 switch ( sensorType ) {
                     case "HUMIDITE":
                         sensor = new Sensor( deviceId, 1, "Humidité", protocol, unit, value );
@@ -50,6 +53,7 @@ public class SensorDataParser {
                         break;
                 }
 
+                // Ajouter le capteur dans la liste de l'appareil correspondant
                 List<Sensor> sensorsList = result.get( deviceId );
 
                 if ( sensorsList == null ) {

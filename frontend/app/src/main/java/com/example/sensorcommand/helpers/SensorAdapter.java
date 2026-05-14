@@ -20,6 +20,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
         this.sensors = sensors;
     }
 
+    // Créer et retourner le ViewHolder avec la vue item_sensor
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder( @NonNull ViewGroup parent, int viewType ) {
@@ -28,6 +29,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
         return new ViewHolder( view );
     }
 
+    // Remplir les données du capteur dans la vue
     @Override
     public void onBindViewHolder( @NonNull ViewHolder holder, int position ) {
         Sensor sensor = sensors.get( position );

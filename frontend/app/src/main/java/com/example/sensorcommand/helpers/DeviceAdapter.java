@@ -14,6 +14,7 @@ import java.util.List;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
 
+    // Interface pour gérer le clic sur un appareil
     public interface OnDeviceClickListener {
         void onClick( String deviceId );
     }
@@ -26,6 +27,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         this.listener = listener;
     }
 
+    // Créer et retourner le ViewHolder avec la vue item_device
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder( @NonNull ViewGroup parent, int viewType ) {
@@ -34,6 +36,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         return new ViewHolder( view );
     }
 
+    // Remplir les données de l'appareil dans la vue
     @Override
     public void onBindViewHolder( @NonNull ViewHolder holder, int position ) {
         String deviceId = deviceIds.get( position );

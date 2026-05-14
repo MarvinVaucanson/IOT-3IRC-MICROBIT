@@ -30,6 +30,7 @@ public class DeviceSensorsFragment extends Fragment {
     private String deviceId;
     private SensorAdapter adapter;
 
+    // Créer une instance du fragment avec l'identifiant de l'appareil en argument
     public static DeviceSensorsFragment newInstance( String deviceId ) {
         DeviceSensorsFragment fragment = new DeviceSensorsFragment();
 
@@ -43,6 +44,7 @@ public class DeviceSensorsFragment extends Fragment {
     @Override
     public void onCreate( @Nullable Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
+        // Récupérer l'identifiant de l'appareil passé en argument
         if ( getArguments() != null ) {
             deviceId = getArguments().getString( DEVICE_ID );
         }
@@ -61,29 +63,35 @@ public class DeviceSensorsFragment extends Fragment {
         TextView subtitleView = view.findViewById( R.id.textViewDeviceSubtitle );
         ImageView btnBack = view.findViewById( R.id.btnBack );
 
+        // Afficher le nom de l'appareil dans le titre et le sous-titre
         titleView.setText( "MICROBIT / " + deviceId );
         subtitleView.setText( deviceId.toUpperCase() );
 
+        // Retourner à l'écran précédent quand cliquer sur le bouton retour
         btnBack.setOnClickListener( v -> requireActivity().getSupportFragmentManager().popBackStack() );
 
+        // Initialiser la liste des capteurs de l'appareil
         RecyclerView recyclerView = view.findViewById( R.id.recyclerViewDeviceSensors );
         recyclerView.setLayoutManager( new LinearLayoutManager( requireContext() ) );
 
         adapter = new SensorAdapter( sensors );
         recyclerView.setAdapter( adapter );
 
+        // Observer les données pour mettre à jour la liste quand de nouvelles données arrivent
         SensorViewModel viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
         viewModel.getDeviceMap().observe( getViewLifecycleOwner(), deviceMap -> {
             updateSensors( deviceMap );
         } );
     }
 
+    // Mettre à jour la liste des capteurs en remplaçant par priorité ou en ajoutant les nouveaux
     private void updateSensors( Map<String, List<Sensor>> deviceMap ) {
         List<Sensor> updated = deviceMap.get( deviceId );
         if ( updated == null ) return;
 
         for ( Sensor incoming : updated ) {
             boolean found = false;
+            // Chercher si le capteur existe déjà dans la liste (même priorité)
             for ( int i = 0; i < sensors.size(); i++ ) {
                 if ( sensors.get( i ).getPriority() == incoming.getPriority() ) {
                     sensors.set( i, incoming );
@@ -92,6 +100,7 @@ public class DeviceSensorsFragment extends Fragment {
                     break;
                 }
             }
+            // Ajouter le capteur s'il n'existe pas encore
             if ( !found ) {
                 sensors.add( incoming );
                 adapter.notifyItemInserted( sensors.size() - 1 );

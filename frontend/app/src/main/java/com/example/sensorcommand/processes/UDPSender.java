@@ -24,6 +24,7 @@ public class UDPSender implements Runnable {
         this.socket = socket;
     }
 
+    // Ajouter un message dans la file d'attente pour l'envoi
     public void sendData( String data ) {
         messageQueue.offer( data );
     }
@@ -32,19 +33,24 @@ public class UDPSender implements Runnable {
     public void run() {
         running = true;
         try {
+            // Tant que l'utilisateur est connecté, on continue à envoyer
             while ( running ) {
+                // Attendre qu'un message soit disponible dans la file d'attente (bloquant)
                 String message = messageQueue.take();
 
                 if ( !running ) break;
 
+                // Résoudre l'adresse IP du serveur
                 InetAddress serverAddress = InetAddress.getByName( IP_HOST );
 
                 byte[] messageToSend = message.getBytes();
 
+                // Créer et envoyer le paquet UDP
                 DatagramPacket packet = new DatagramPacket( messageToSend, messageToSend.length, serverAddress, PORT );
 
                 socket.send( packet );
 
+                // Envoyer les informations sur le log
                 viewModel.postLog( "[UDP] Envoyé '" + message + "' vers " + IP_HOST + ":" + PORT + " depuis port local " + socket.getLocalPort() );
                 viewModel.postConnected( true );
 
@@ -58,8 +64,10 @@ public class UDPSender implements Runnable {
         }
     }
 
+    // Fonction pour arrêter le thread
     public void stop() {
         running = false;
+        // Débloquer le take() en envoyant un message factice
         messageQueue.offer( "Stop" );
 
         viewModel.postConnected( false );
