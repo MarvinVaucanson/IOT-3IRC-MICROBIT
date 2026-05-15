@@ -4,13 +4,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,6 +23,7 @@ import com.example.sensorcommand.model.Sensor;
 import com.example.sensorcommand.viewmodel.SensorViewModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +33,10 @@ public class DeviceSensorsFragment extends Fragment {
     private final List<Sensor> sensors = new ArrayList<>();
     private String deviceId;
     private SensorAdapter adapter;
+
+    private SensorViewModel viewModel;
+    private TextView textViewCurrentOrder;
+    private boolean initialLoadDone = false;
 
     // Créer une instance du fragment avec l'identifiant de l'appareil en argument
     public static DeviceSensorsFragment newInstance( String deviceId ) {
@@ -62,6 +70,8 @@ public class DeviceSensorsFragment extends Fragment {
         TextView titleView = view.findViewById( R.id.textViewDeviceTitle );
         TextView subtitleView = view.findViewById( R.id.textViewDeviceSubtitle );
         ImageView btnBack = view.findViewById( R.id.btnBack );
+        TextView textViewCurrentOrder = view.findViewById( R.id.textViewCurrentOrder );
+        Button btnSendOrder = view.findViewById( R.id.btnSendOrder );
 
         // Afficher le nom de l'appareil dans le titre et le sous-titre
         titleView.setText( "MICROBIT / " + deviceId );
@@ -78,32 +88,80 @@ public class DeviceSensorsFragment extends Fragment {
         recyclerView.setAdapter( adapter );
 
         // Observer les données pour mettre à jour la liste quand de nouvelles données arrivent
-        SensorViewModel viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
-        viewModel.getDeviceMap().observe( getViewLifecycleOwner(), deviceMap -> {
-            updateSensors( deviceMap );
+        setupDragAndDrop( recyclerView );
+
+        viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
+        viewModel.getDeviceMap().observe( getViewLifecycleOwner(), this::updateSensors );
+
+        btnSendOrder.setOnClickListener( v -> {
+            if ( sensors.isEmpty() ) {
+                Toast.makeText( requireContext(), "Aucun capteur disponible", Toast.LENGTH_SHORT ).show();
+                return;
+            }
+            String order = adapter.buildOrderString();
+            viewModel.sendOrder( order );
+            Toast.makeText( requireContext(), "Ordre envoyé : " + order, Toast.LENGTH_SHORT ).show();
         } );
     }
 
-    // Mettre à jour la liste des capteurs en remplaçant par priorité ou en ajoutant les nouveaux
-    private void updateSensors( Map<String, List<Sensor>> deviceMap ) {
-        List<Sensor> updated = deviceMap.get( deviceId );
-        if ( updated == null ) return;
+    private void setupDragAndDrop( RecyclerView recyclerView )
+    {
+        ItemTouchHelper.Callback callback = new ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0 ) {
 
-        for ( Sensor incoming : updated ) {
-            boolean found = false;
+            @Override
+            public boolean onMove( @NonNull RecyclerView rv,
+                                   @NonNull RecyclerView.ViewHolder from,
+                                   @NonNull RecyclerView.ViewHolder to ) {
+                adapter.moveItem( from.getAdapterPosition(), to.getAdapterPosition() );
+                updateOrderLabel();
+                return true;
+            }
+
+            @Override
+            public void onSwiped( @NonNull RecyclerView.ViewHolder viewHolder, int direction ) {
+                // Pas de swipe
+            }
+        };
+
+        new ItemTouchHelper( callback ).attachToRecyclerView( recyclerView );
+    }
+
+    private void updateOrderLabel() {
+        if ( sensors.isEmpty() ) return;
+        String order = adapter.buildOrderString();
+        textViewCurrentOrder.setText( "ORDRE ACTUEL : " + order );
+    }
+
+    // Mettre à jour la liste des capteurs en remplaçant par priorité ou en ajoutant les nouveaux
+    private void updateSensors( Map<String, List<Sensor>> deviceMap )
+    {
+        List<Sensor> updated = deviceMap.get( deviceId );
+
+        if ( updated == null || updated.isEmpty() ) return;
+
+        if ( !initialLoadDone ) {
+            // Tri initial par priorité pour un ordre cohérent au départ
+            sensors.clear();
+            List<Sensor> sorted = new ArrayList<>( updated );
+            Collections.sort( sorted, (a, b ) -> Integer.compare( a.getPriority(), b.getPriority() ) );
+            sensors.addAll( sorted );
+            adapter.notifyDataSetChanged();
+            initialLoadDone = true;
+            updateOrderLabel();
+            return;
+        }
+
+        // Mise à jour des valeurs sans changer l'ordre défini par l'utilisateur
+        for ( Sensor incoming : updated )
+        {
             // Chercher si le capteur existe déjà dans la liste (même priorité)
             for ( int i = 0; i < sensors.size(); i++ ) {
                 if ( sensors.get( i ).getPriority() == incoming.getPriority() ) {
                     sensors.set( i, incoming );
                     adapter.notifyItemChanged( i );
-                    found = true;
                     break;
                 }
-            }
-            // Ajouter le capteur s'il n'existe pas encore
-            if ( !found ) {
-                sensors.add( incoming );
-                adapter.notifyItemInserted( sensors.size() - 1 );
             }
         }
     }

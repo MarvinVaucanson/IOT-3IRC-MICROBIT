@@ -88,6 +88,23 @@ public class SensorViewModel extends ViewModel {
         }
     }
 
+    // Se déconnecter du serveur UDP
+    public void disconnectServer() {
+        stopAll();
+        currentServerPort.postValue( null );
+        postConnected( false );
+    }
+
+    // Envoyer l'ordre d'affichage des capteurs
+    public void sendOrder( String order ) {
+        if ( udpSender != null ) {
+            udpSender.sendData( order );
+            postLog( "[UDP] Ordre d'affichage envoyé : " + order );
+        } else {
+            postLog( "[ERR] Non connecté au serveur" );
+        }
+    }
+
     // Arrêter les threads et fermer le socket
     private void stopAll() {
         if ( udpSender != null ) {
