@@ -96,10 +96,11 @@ public class SensorViewModel extends ViewModel {
     }
 
     // Envoyer l'ordre d'affichage des capteurs
-    public void sendOrder( String order ) {
+    public void sendOrder( String deviceId, String order ) {
         if ( udpSender != null ) {
-            udpSender.sendData( order );
-            postLog( "[UDP] Ordre d'affichage envoyé : " + order );
+            String message = "configScreen/" + deviceId + ":" + order;
+            udpSender.sendData( message );
+            postLog( "[UDP] Ordre envoyé pour micro:bit " + deviceId + " : " + order );
         } else {
             postLog( "[ERR] Non connecté au serveur" );
         }

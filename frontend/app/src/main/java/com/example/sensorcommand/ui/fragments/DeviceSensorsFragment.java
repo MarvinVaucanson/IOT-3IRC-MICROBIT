@@ -70,8 +70,9 @@ public class DeviceSensorsFragment extends Fragment {
         TextView titleView = view.findViewById( R.id.textViewDeviceTitle );
         TextView subtitleView = view.findViewById( R.id.textViewDeviceSubtitle );
         ImageView btnBack = view.findViewById( R.id.btnBack );
-        TextView textViewCurrentOrder = view.findViewById( R.id.textViewCurrentOrder );
         Button btnSendOrder = view.findViewById( R.id.btnSendOrder );
+
+        textViewCurrentOrder = view.findViewById( R.id.textViewCurrentOrder );
 
         // Afficher le nom de l'appareil dans le titre et le sous-titre
         titleView.setText( "MICROBIT / " + deviceId );
@@ -99,7 +100,7 @@ public class DeviceSensorsFragment extends Fragment {
                 return;
             }
             String order = adapter.buildOrderString();
-            viewModel.sendOrder( order );
+            viewModel.sendOrder( deviceId, order );
             Toast.makeText( requireContext(), "Ordre envoyé : " + order, Toast.LENGTH_SHORT ).show();
         } );
     }
