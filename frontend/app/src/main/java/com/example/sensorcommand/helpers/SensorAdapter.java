@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.sensorcommand.R;
 import com.example.sensorcommand.model.Sensor;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder> {
@@ -20,6 +21,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
         this.sensors = sensors;
     }
 
+    // Créer et retourner le ViewHolder avec la vue item_sensor
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder( @NonNull ViewGroup parent, int viewType ) {
@@ -28,6 +30,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
         return new ViewHolder( view );
     }
 
+    // Remplir les données du capteur dans la vue
     @Override
     public void onBindViewHolder( @NonNull ViewHolder holder, int position ) {
         Sensor sensor = sensors.get( position );
@@ -40,6 +43,19 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
     @Override
     public int getItemCount() {
         return sensors.size();
+    }
+
+    public void moveItem( int from, int to ) {
+        Collections.swap( sensors, from, to );
+        notifyItemMoved( from, to );
+    }
+
+    public String buildOrderString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for ( Sensor sensor : sensors ) {
+            stringBuilder.append( Character.toUpperCase( sensor.getName().charAt( 0 ) ) );
+        }
+        return stringBuilder.toString();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

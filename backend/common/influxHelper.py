@@ -1,9 +1,10 @@
-from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import SYNCHRONOUS
-import time
-import os
+import time, os
+
 from dotenv import load_dotenv
 from pathlib import Path
+
+from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client import InfluxDBClient, Point, WritePrecision
 
 env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -12,7 +13,7 @@ load_dotenv(dotenv_path=env_path)
 token = os.getenv("INFLUXDB_TOKEN")
 org = "CPE_Lyon"
 bucket = "iot_3irc-microbit"
-url = "http://10.42.229.174:8086"
+url = f"http://{os.getenv("INFLUX_IP")}:8086"
 
 client = InfluxDBClient(url=url, token=token, org=org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -20,15 +21,17 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 UNIT = {
         "temperature": "°C",
         "humidite": "%",
-        "luminosite": "lux"
+        "luminosite": "lux",
+        "pression": "hPa",
 }
 
-def writeToInfluxDB(device_id: str, temperature: float, humidite: float, luminosite: int):
+def writeToInfluxDB(device_id: str, temperature: float, humidite: float, luminosite: int, pression: int):
     point = Point("data") \
             .tag("deviceId", f"{device_id}") \
             .field("temperature", temperature) \
             .field("humidite", humidite) \
             .field("luminosite", luminosite) \
+            .field("pression", pression) \
             .time(time.time_ns(), WritePrecision.NS)
 
     write_api.write(bucket=bucket, org=org, record=point)

@@ -1,5 +1,10 @@
+import os, socket
+
 from common.influxHelper import *
-import socket
+from dotenv import load_dotenv
+
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 def printHello():
     print("Hello, World!")
@@ -20,4 +25,4 @@ def setScreenConfig(udpMessage):
     config = splitedUdpMessage[1]
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    sock.sendto(config.encode(), ("10.42.229.174", 11000))
+    sock.sendto(config.encode(), (os.getenv("UART_SERVER_IP"), 11000))
