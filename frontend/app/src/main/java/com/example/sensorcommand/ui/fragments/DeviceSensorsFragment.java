@@ -128,6 +128,7 @@ public class DeviceSensorsFragment extends Fragment {
         new ItemTouchHelper( callback ).attachToRecyclerView( recyclerView );
     }
 
+    // Mettre à jour l'ordre choisi par l'utilisateur
     private void updateOrderLabel() {
         if ( sensors.isEmpty() ) return;
         String order = adapter.buildOrderString();
@@ -145,7 +146,7 @@ public class DeviceSensorsFragment extends Fragment {
             // Tri initial par priorité pour un ordre cohérent au départ
             sensors.clear();
             List<Sensor> sorted = new ArrayList<>( updated );
-            Collections.sort( sorted, (a, b ) -> Integer.compare( a.getPriority(), b.getPriority() ) );
+            Collections.sort( sorted, (a, b ) -> a.getInitial().compareTo( b.getInitial() ) );
             sensors.addAll( sorted );
             adapter.notifyDataSetChanged();
             initialLoadDone = true;
@@ -156,9 +157,9 @@ public class DeviceSensorsFragment extends Fragment {
         // Mise à jour des valeurs sans changer l'ordre défini par l'utilisateur
         for ( Sensor incoming : updated )
         {
-            // Chercher si le capteur existe déjà dans la liste (même priorité)
+            // Chercher si le capteur existe déjà dans la liste (même initiale)
             for ( int i = 0; i < sensors.size(); i++ ) {
-                if ( sensors.get( i ).getPriority() == incoming.getPriority() ) {
+                if ( sensors.get( i ).getInitial().equals( incoming.getInitial() ) ) {
                     sensors.set( i, incoming );
                     adapter.notifyItemChanged( i );
                     break;

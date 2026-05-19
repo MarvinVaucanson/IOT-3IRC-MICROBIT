@@ -34,22 +34,30 @@ public class SensorDataParser {
 
                 Sensor sensor;
 
-                // Associer chaque type de capteur à sa priorité d'affichage
+                // Associer chaque type de capteur à son initiale d'affichage
                 switch ( sensorType ) {
                     case "HUMIDITE":
-                        sensor = new Sensor( deviceId, 1, "Humidité", protocol, unit, value );
+                    case "HUMI":
+                        sensor = new Sensor( deviceId, "H", "Humidité", protocol, unit, value );
                         break;
                     case "LUMINOSITE":
-                        sensor = new Sensor( deviceId, 4, "Luminosité", protocol, unit, value );
+                    case "LUX":
+                        sensor = new Sensor( deviceId, "L", "Luminosité", protocol, unit, value );
                         break;
                     case "TEMPERATURE":
-                        sensor = new Sensor( deviceId, 5, "Température", protocol, unit, value );
+                    case "BOU":
+                        sensor = new Sensor( deviceId, "T", "Température", protocol, unit, value );
                         break;
                     case "PRESSION":
-                        sensor = new Sensor( deviceId, 6, "Pression", protocol, unit, value );
+                    case "ACC":
+                        sensor = new Sensor( deviceId, "P", "Pression", protocol, unit, value );
+                        break;
+                    case "CO2":
+                        sensor = new Sensor( deviceId, "C", "CO2", protocol, unit, value );
                         break;
                     default:
-                        sensor = new Sensor( deviceId, 0, sensorType, protocol, unit, value );
+                        String initial = sensorType.length() > 0 ? sensorType.substring( 0, 1 ) : "?";
+                        sensor = new Sensor( deviceId, initial, sensorType, protocol, unit, value );
                         break;
                 }
 
