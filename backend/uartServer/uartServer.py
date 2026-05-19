@@ -6,7 +6,7 @@ import re
 from backend.common.influxHelper import writeToInfluxDB
 
 # send serial message
-SERIALPORT = "COM4"
+SERIALPORT = "COM3"
 BAUDRATE = 115200
 START_CHAR = "&"
 END_CHAR = "$"
@@ -75,10 +75,15 @@ def uart_loop():
                 end = data_str.index("$")
                 res += data_str[:end+1]
                 sendDataToInflux(res)
-                res = ""
-                stringBegin = False
+                if "&" in data_str:
+                    start = data_str.index("&")
+                    res = data_str[start:]
+                    stringBegin = True
+                else:
+                    res = ""
+                    stringBegin = False
 
-            elif stringBegin:
+            elif stringBegin and "&" not in data_str and "$" not in data_str:
                 res += data_str
 
 def udp_loop():
