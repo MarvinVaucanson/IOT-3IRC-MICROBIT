@@ -1,22 +1,160 @@
-/*Ceci est le code d'envoie et d'attente de réponse (gate)*/
-#include <stdio.h>
-#include <string.h>
+/* Ceci est le code de réception + réponse (capteur) */
 #include "MicroBit.h"
-#include "stdbool.h"
+#include <stdio.h>
+#include "tsl256x.h"
+#include "bme280.h"
 
 #define KEY "TORTUE"
+#define RADIO_GROUP 42
+
 MicroBit uBit;
 
-bool verifyDataStruct(ManagedString s)
+/* --- Connexion I2C --- */
+MicroBitI2C myI2C(uBit.io.P2.name, uBit.io.P1.name);
+
+#define OLED_ADDR 0x7A  // Adresse écran OLED
+
+// prototype
+void xorCrypt(char *message, const char *key);
+
+/* --- Structure pour les données des capteurs --- */
+struct SensorData {
+    int temperature;
+    uint32_t pressure;
+    uint16_t humidity;
+    uint32_t light;
+};
+
+/* --- Configuration de l'afficahge --- */
+const char* OBJECT_ID = "01";
+const int deviceId = 1; // ID de l'appareil, à personnaliser pour chaque micro:bit
+const int SEND_INTERVAL_MS = 1000;
+char display_order[] = {'T', 'L', 'H', 'P'}; // Ordre d'affichage
+int num_sensors_to_display = 4;
+
+/* --- Police de caractère --- */
+const uint8_t font5x7[95][5] = {
+    {0x00, 0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x5F, 0x00, 0x00}, {0x00, 0x07, 0x00, 0x07, 0x00}, {0x14, 0x7F, 0x14, 0x7F, 0x14}, {0x24, 0x2A, 0x7F, 0x2A, 0x12}, {0x23, 0x13, 0x08, 0x64, 0x62}, {0x36, 0x49, 0x55, 0x22, 0x50}, {0x00, 0x05, 0x03, 0x00, 0x00}, {0x00, 0x1C, 0x22, 0x41, 0x00}, {0x00, 0x41, 0x22, 0x1C, 0x00}, {0x08, 0x2A, 0x1C, 0x2A, 0x08}, {0x08, 0x08, 0x3E, 0x08, 0x08}, {0x00, 0x50, 0x30, 0x00, 0x00}, {0x08, 0x08, 0x08, 0x08, 0x08}, {0x00, 0x60, 0x60, 0x00, 0x00}, {0x20, 0x10, 0x08, 0x04, 0x02}, {0x3E, 0x51, 0x49, 0x45, 0x3E}, {0x00, 0x42, 0x7F, 0x40, 0x00}, {0x42, 0x61, 0x51, 0x49, 0x46}, {0x21, 0x41, 0x45, 0x4B, 0x31}, {0x18, 0x14, 0x12, 0x7F, 0x10}, {0x27, 0x45, 0x45, 0x45, 0x39}, {0x3C, 0x4A, 0x49, 0x49, 0x30}, {0x01, 0x71, 0x09, 0x05, 0x03}, {0x36, 0x49, 0x49, 0x49, 0x36}, {0x06, 0x49, 0x49, 0x29, 0x1E}, {0x00, 0x36, 0x36, 0x00, 0x00}, {0x00, 0x56, 0x36, 0x00, 0x00}, {0x00, 0x08, 0x14, 0x22, 0x41}, {0x14, 0x14, 0x14, 0x14, 0x14}, {0x41, 0x22, 0x14, 0x08, 0x00}, {0x02, 0x01, 0x51, 0x09, 0x06}, {0x32, 0x49, 0x79, 0x41, 0x3E}, {0x7E, 0x11, 0x11, 0x11, 0x7E}, {0x7F, 0x49, 0x49, 0x49, 0x36}, {0x3E, 0x41, 0x41, 0x41, 0x22}, {0x7F, 0x41, 0x41, 0x22, 0x1C}, {0x7F, 0x49, 0x49, 0x49, 0x41}, {0x7F, 0x09, 0x09, 0x01, 0x01}, {0x3E, 0x41, 0x41, 0x51, 0x32}, {0x7F, 0x08, 0x08, 0x08, 0x7F}, {0x00, 0x41, 0x7F, 0x41, 0x00}, {0x20, 0x40, 0x41, 0x3F, 0x01}, {0x7F, 0x08, 0x14, 0x22, 0x41}, {0x7F, 0x40, 0x40, 0x40, 0x40}, {0x7F, 0x02, 0x04, 0x02, 0x7F}, {0x7F, 0x04, 0x08, 0x10, 0x7F}, {0x3E, 0x41, 0x41, 0x41, 0x3E}, {0x7F, 0x09, 0x09, 0x09, 0x06}, {0x3E, 0x41, 0x51, 0x21, 0x5E}, {0x7F, 0x09, 0x19, 0x29, 0x46}, {0x46, 0x49, 0x49, 0x49, 0x31}, {0x01, 0x01, 0x7F, 0x01, 0x01}, {0x3F, 0x40, 0x40, 0x40, 0x3F}, {0x1F, 0x20, 0x40, 0x20, 0x1F}, {0x7F, 0x20, 0x18, 0x20, 0x7F}, {0x63, 0x14, 0x08, 0x14, 0x63}, {0x03, 0x04, 0x78, 0x04, 0x03}, {0x61, 0x51, 0x49, 0x45, 0x43}, {0x00, 0x7F, 0x41, 0x41, 0x00}, {0x02, 0x04, 0x08, 0x10, 0x20}, {0x00, 0x41, 0x41, 0x7F, 0x00}, {0x04, 0x02, 0x01, 0x02, 0x04}, {0x40, 0x40, 0x40, 0x40, 0x40}, {0x00, 0x01, 0x02, 0x04, 0x00}, {0x20, 0x54, 0x54, 0x54, 0x78}, {0x7F, 0x48, 0x44, 0x44, 0x38}, {0x38, 0x44, 0x44, 0x44, 0x20}, {0x38, 0x44, 0x44, 0x48, 0x7F}, {0x38, 0x54, 0x54, 0x54, 0x18}, {0x08, 0x7E, 0x09, 0x01, 0x02}, {0x08, 0x14, 0x54, 0x54, 0x3C}, {0x7F, 0x08, 0x04, 0x04, 0x78}, {0x00, 0x44, 0x7D, 0x40, 0x00}, {0x20, 0x40, 0x44, 0x3D, 0x00}, {0x00, 0x7F, 0x10, 0x28, 0x44}, {0x00, 0x41, 0x7F, 0x40, 0x00}, {0x7C, 0x04, 0x18, 0x04, 0x78}, {0x7C, 0x08, 0x04, 0x04, 0x78}, {0x38, 0x44, 0x44, 0x44, 0x38}, {0x7C, 0x14, 0x14, 0x14, 0x08}, {0x08, 0x14, 0x14, 0x18, 0x7C}, {0x7C, 0x08, 0x04, 0x04, 0x08}, {0x48, 0x54, 0x54, 0x54, 0x20}, {0x04, 0x3F, 0x44, 0x40, 0x20}, {0x3C, 0x40, 0x40, 0x20, 0x7C}, {0x1C, 0x20, 0x40, 0x20, 0x1C}, {0x3C, 0x40, 0x30, 0x40, 0x3C}, {0x44, 0x28, 0x10, 0x28, 0x44}, {0x0C, 0x50, 0x50, 0x50, 0x3C}, {0x44, 0x64, 0x54, 0x4C, 0x44}, {0x00, 0x08, 0x36, 0x41, 0x00}, {0x00, 0x00, 0x7F, 0x00, 0x00}, {0x00, 0x41, 0x36, 0x08, 0x00}, {0x08, 0x04, 0x08, 0x10, 0x08}};
+
+/* --- Fonction pour envoyer une COMMANDE à l'écran OLED --- */
+void sendCommand(uint8_t command)
 {
-    if (s.length() < 2) return false;
-    return (s.charAt(0) == '&' && s.charAt(s.length() - 1) == '$');
+    char buf[2] = {0x00, command};
+    myI2C.write(OLED_ADDR, buf, 2);
 }
 
-bool verifyDataStructParam(ManagedString s)
+/* --- Positionner le curseur --- */
+void setCursor(uint8_t x, uint8_t page)
 {
-    if (s.length() < 2) return false;
-    return (s.charAt(0) == '@' && s.charAt(s.length() - 1) == '\n');
+    sendCommand(0xB0 + page);              // Page 0 à 7
+    sendCommand(0x00 | (x & 0x0F));        // Colonne (partie basse)
+    sendCommand(0x10 | ((x >> 4) & 0x0F)); // Colonne (partie haute)
+}
+
+/* --- Effacer tout l'écran --- */
+void clearOLED()
+{
+    for (uint8_t page = 0; page < 8; page++)
+    {
+        setCursor(0, page);
+        char data[129];
+        data[0] = 0x40;
+        for (int i = 1; i <= 128; i++)
+            data[i] = 0x00;
+        myI2C.write(OLED_ADDR, data, 129);
+    }
+}
+
+/* --- Ecrire sur l'écran --- */
+void printText(const char *text, uint8_t x, uint8_t y_page)
+{
+    setCursor(x, y_page);
+
+    while (*text)
+    {
+        char c = *text;
+        if (c >= 32 && c <= 126)
+        {
+            uint8_t index = c - 32;
+            char data[7];
+            data[0] = 0x40;
+            for (int i = 0; i < 5; i++)
+            {
+                data[i + 1] = font5x7[index][i];
+            }
+            data[6] = 0x00;
+            myI2C.write(OLED_ADDR, data, 7);
+        }
+        text++;
+    }
+}
+
+/* --- Initialisation de l'écran --- */
+void initOLED()
+{
+    uBit.io.P0.setDigitalValue(1);
+    uBit.sleep(1);
+    uBit.io.P0.setDigitalValue(0);
+    uBit.sleep(10);
+    uBit.io.P0.setDigitalValue(1);
+    uBit.sleep(10);
+
+    sendCommand(0xAE); sendCommand(0xD5); sendCommand(0x80); sendCommand(0xA8);
+    sendCommand(0x3F); sendCommand(0xD3); sendCommand(0x00); sendCommand(0x40);
+    sendCommand(0x8D); sendCommand(0x14); sendCommand(0x20); sendCommand(0x00);
+    sendCommand(0xA1); sendCommand(0xC8); sendCommand(0xDA); sendCommand(0x12);
+    sendCommand(0x81); sendCommand(0xCF); sendCommand(0xD9); sendCommand(0xF1);
+    sendCommand(0xDB); sendCommand(0x40); sendCommand(0xA4); sendCommand(0xA6);
+    sendCommand(0xAF);
+}
+
+/* --- Lecture des capteurs --- */
+SensorData readSensors(bme280 &bme, tsl256x &tsl) {
+    SensorData data;
+
+    int32_t temp_raw;
+    uint32_t pressure, light;
+    uint16_t humidity;
+
+    bme.sensor_read(&pressure, &temp_raw, &humidity);
+    tsl.sensor_read(NULL, NULL, &light);
+
+    data.temperature = bme.compensate_temperature(temp_raw);
+    data.humidity = bme.compensate_humidity(humidity);
+    data.pressure = pressure;
+    data.light = light;
+
+    return data;
+}
+
+/* --- Mise à jour affichage écran --- */
+void updateSensorDisplay(SensorData data) {
+    clearOLED();
+    int current_page = 0;
+
+    for (int i = 0; i < num_sensors_to_display; i++)
+    {
+        if (current_page > 7) break;
+
+        char line_buffer[30];
+        char sensorType = display_order[i];
+
+        if (sensorType == 'T') {
+            sprintf(line_buffer, "Temp: %d.%02d C", data.temperature/100, abs(data.temperature%100));
+        } 
+        else if (sensorType == 'L') {
+            sprintf(line_buffer, "Lumiere: %u lux", (unsigned int)data.light);
+        } 
+        else if (sensorType == 'P') {
+            sprintf(line_buffer, "Pression: %u hPa", (unsigned int)data.pressure);
+        } 
+        else if (sensorType == 'H') {
+            sprintf(line_buffer, "Humidite: %d.%02d %%", data.humidity/100, data.humidity%100);
+        }
+
+        printText(line_buffer, 0, current_page);
+        current_page += 2;
+    }
 }
 
 void xorCrypt(char *message,const char *key)
@@ -30,91 +168,133 @@ void xorCrypt(char *message,const char *key)
 
 void onData(MicroBitEvent)
 {
-    ManagedString s = uBit.radio.datagram.recv();
+    PacketBuffer pb = uBit.radio.datagram.recv();
 
+    int len = pb.length();
     char buffer[255];
     memset(buffer, 0, sizeof(buffer));
-    strncpy(buffer, s.toCharArray(), sizeof(buffer) - 1);
+    for (int i = 0; i < len && i < 254; i++)
+        buffer[i] = pb[i];
 
-    xorCrypt(buffer, KEY);
+    int keylen = strlen(KEY);
+    for (int i = 0; i < len; i++)
+        buffer[i] ^= KEY[i % keylen];
 
-    ManagedString decoded(buffer);
+    ManagedString cmd(buffer);
 
-    uBit.serial.printf("RX : %s", decoded.toCharArray());
+    int sep = -1;
 
-    if(verifyDataStruct(decoded)){
-        
-        uBit.serial.send(decoded);
-        uBit.display.scroll("OK");
+    if (cmd.charAt(0) == '&') {
+        // TEST
+        // uBit.display.print("C");
+        // uBit.display.scroll(cmd);
+
+        ManagedString inner = cmd.substring(1, cmd.length() - 2);
+
+        if (inner == "PING") {
+            char reply[32] = "&PONG$";
+            xorCrypt(reply, KEY);
+            uBit.radio.datagram.send(ManagedString(reply));
+            uBit.display.print("P");
+        } else {
+            for (int i = 0; i < inner.length(); i++) {
+                if (inner.charAt(i) == ':') {
+                    sep = i;
+                    break;
+                }
+            }
+        }
+        if (sep > 0) {
+            ManagedString idPart  = inner.substring(0, sep);
+            ManagedString ordPart = inner.substring(sep + 1, inner.length() - sep - 1);
+
+            int receivedId = atoi(idPart.toCharArray());
+
+            // uBit.display.print("O");
+            // uBit.display.scroll(ordPart);
+
+            if (receivedId == deviceId && ordPart.length() <= 4) {
+                num_sensors_to_display = ordPart.length();
+                for (int i = 0; i < num_sensors_to_display; i++) {
+                    display_order[i] = ordPart.charAt(i);
+                }
+                uBit.display.print("U");
+            }
+        }
     }
-
-    // DEBUG
-    // if (s == "PONG")
-    //     uBit.display.scroll("OK");
-    // else
-    //     uBit.display.scroll(s);
-}
-
-void onSerialData(MicroBitEvent)
-{
-    ManagedString s = uBit.serial.readUntil('\n'); //change end char
-    uBit.serial.printf("RX SERIAL : %s\n", s.toCharArray());
-    
-    if(verifyDataStructParam(s)){
-        // Faire quelque chose avec les données
-        char buffer[255];
-        memset(buffer, 0, sizeof(buffer));
-        strncpy(buffer, s.toCharArray(), sizeof(buffer) - 1);
-
-        xorCrypt(buffer, KEY);
-
-        ManagedString encrypted(buffer);
-        uBit.radio.datagram.send(encrypted);
-        uBit.display.scroll("SERIE-RECV");
-    }   
 }
 
 int main()
 {
-    // Initialise the micro:bit runtime.
     uBit.init();
-
     uBit.radio.setGroup(42);
     uBit.radio.setTransmitPower(7);
-
     uBit.radio.enable();
 
+    /* --- Initialisation de l'écran --- */
+    initOLED();
+    clearOLED();
+
+    /* --- Initialisation des capteurs --- */
+    // BME280
+    bme280 bme(&uBit, &myI2C, 0xEC);
+    
+    // TSL2561
+    tsl256x tsl(&uBit, &myI2C, 0x52);
+
+    int last_time = 0;
+
+    printText("Init...", 0, 0);
+    uBit.sleep(1000);
+
     uBit.messageBus.listen(
-        MICROBIT_ID_RADIO, 
-        MICROBIT_RADIO_EVT_DATAGRAM, 
+        MICROBIT_ID_RADIO,
+        MICROBIT_RADIO_EVT_DATAGRAM,
         onData
     );
-    uBit.messageBus.listen(
-        MICROBIT_ID_SERIAL,
-        MICROBIT_SERIAL_EVT_DELIM_MATCH,
-        onSerialData
-    );
+
+    while (true)
+    {
+        int current_time = uBit.systemTime();
+
+        if (current_time - last_time >= SEND_INTERVAL_MS || last_time == 0) {
+            last_time = current_time;
+            
+            SensorData data = readSensors(bme, tsl);
+
+            updateSensorDisplay(data);
+
+            // &<deviceId>|<temperature>|<luminosite>|<humidite>|<pressure>$
+            char buffer[100];
+            sprintf(buffer, "&%d|%d.%02d|%lu|%d.%02d|%lu$",
+                deviceId,
+                data.temperature / 100,
+                abs(data.temperature % 100),
+                data.light,
+                data.humidity/100, 
+                data.humidity%100,
+                data.pressure
+            );
+
+            xorCrypt(buffer, KEY);
+    
+            int result = uBit.radio.datagram.send(buffer);
+    
+            if (result == MICROBIT_OK)
+                uBit.display.display(".");
+            else if (result == MICROBIT_INVALID_PARAMETER)
+                uBit.display.scroll("ERR_PARAM");
+            else if (result == MICROBIT_NOT_SUPPORTED){
+                uBit.display.scroll("ERR_RADIO");
+                uBit.display.scroll(ManagedString(result));
+            }
+            else
+                uBit.display.scroll(ManagedString(result));
+        }
+
+        
+        uBit.sleep(6000);
+    }
 
     release_fiber();
-
-    // while(1)
-    // {
-    //     // VVVVVVVVV Here insert if you whant to send data to capteur      
-
-    //     // DEBUG
-    //     // uBit.serial.printf("SEND: %d\n", result);
-    
-    //     // if (result == MICROBIT_OK)
-    //     //     uBit.display.scroll("SENT");
-    //     // else if (result == MICROBIT_INVALID_PARAMETER)
-    //     //     uBit.display.scroll("ERR_PARAM");
-    //     // else if (result == MICROBIT_NOT_SUPPORTED){
-    //     //     uBit.display.scroll("ERR_RADIO");
-    //     //     uBit.display.scroll(ManagedString(result));
-    //     // }
-    //     // else
-    //     //     uBit.display.scroll(ManagedString(result));
-
-    //     // uBit.sleep(5000);    
-    // }
 }
