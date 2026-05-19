@@ -34,7 +34,7 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
     @Override
     public void onBindViewHolder( @NonNull ViewHolder holder, int position ) {
         Sensor sensor = sensors.get( position );
-        holder.textViewPriority.setText( String.valueOf( sensor.getPriority() ) );
+        holder.textViewInitial.setText( String.valueOf( sensor.getInitial() ) );
         holder.textViewName.setText( sensor.getName() );
         holder.textViewProtocol.setText( sensor.getProtocol() );
         holder.textViewValue.setText( sensor.getValue() + " " + sensor.getUnit() );
@@ -53,17 +53,17 @@ public class SensorAdapter extends RecyclerView.Adapter<SensorAdapter.ViewHolder
     public String buildOrderString() {
         StringBuilder stringBuilder = new StringBuilder();
         for ( Sensor sensor : sensors ) {
-            stringBuilder.append( Character.toUpperCase( sensor.getName().charAt( 0 ) ) );
+            stringBuilder.append( sensor.getInitial() );
         }
         return stringBuilder.toString();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewPriority, textViewName, textViewProtocol, textViewValue;
+        TextView textViewInitial, textViewName, textViewProtocol, textViewValue;
 
         ViewHolder( View itemView ) {
             super( itemView );
-            textViewPriority = itemView.findViewById( R.id.textViewPriority );
+            textViewInitial = itemView.findViewById( R.id.textViewInitial );
             textViewName = itemView.findViewById( R.id.textViewName );
             textViewProtocol = itemView.findViewById( R.id.textViewProtocol );
             textViewValue = itemView.findViewById( R.id.textViewValue );
