@@ -1,1 +1,1 @@
-### Micro:bit communication avec passerelle
+### Capteur TH et ecran avec Micro:bit
