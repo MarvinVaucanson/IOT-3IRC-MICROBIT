@@ -4,12 +4,18 @@
 #include "tsl256x.h"
 #include "bme280.h"
 
+#define KEY "TORTUE"
+#define RADIO_GROUP 42
+
 MicroBit uBit;
 
 /* --- Connexion I2C --- */
 MicroBitI2C myI2C(uBit.io.P2.name, uBit.io.P1.name);
 
 #define OLED_ADDR 0x7A  // Adresse écran OLED
+
+// prototype
+void xorCrypt(char *message, const char *key);
 
 /* --- Structure pour les données des capteurs --- */
 struct SensorData {
@@ -150,23 +156,44 @@ void updateSensorDisplay(SensorData data) {
     }
 }
 
+void xorCrypt(char *message,const char *key)
+{
+    int keylen = strlen(key);
+    for(int i = 0; message[i] != '\0';i++)
+    {
+        message[i] ^= key[i % keylen];
+    }
+}
+
 void onData(MicroBitEvent)
 {
     ManagedString s = uBit.radio.datagram.recv();
-    if (s == "PING")
-    {
-        uBit.display.print("P");            // feedback visuel
-        int result = uBit.radio.datagram.send("PONG");   // réponse
-    if (result == MICROBIT_OK)
-        uBit.display.scroll("SENT-2");
-    }
 
+    char buffer[255];
+    memset(buffer, 0, sizeof(buffer));
+    strncpy(buffer, s.toCharArray(), sizeof(buffer) - 1);
+    xorCrypt(buffer, KEY);
+
+    ManagedString cmd(buffer);
+
+    if (cmd.charAt(0) == '@') {
+        uBit.display.print("R");
+
+        ManagedString inner = cmd.substring(1, cmd.length() - 2);
+
+        if (inner == "PING") {
+            char reply[32] = "&PONG$";
+            xorCrypt(reply, KEY);
+            uBit.radio.datagram.send(ManagedString(reply));
+            uBit.display.print("P");
+        }
+    }
 }
 
 int main()
 {
     uBit.init();
-    uBit.radio.setGroup(41);
+    uBit.radio.setGroup(42);
     uBit.radio.setTransmitPower(7);
     uBit.radio.enable();
 
@@ -216,6 +243,8 @@ int main()
                 data.humidity%100,
                 data.pressure
             );
+
+            xorCrypt(buffer, KEY);
     
             int result = uBit.radio.datagram.send(buffer);
     
