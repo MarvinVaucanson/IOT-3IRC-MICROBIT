@@ -209,12 +209,15 @@ public class SystemFragment extends Fragment {
             if ( port != null ) {
                 textViewPortSystem.setText( "PORT: " + String.valueOf( port ) );
             }
+            else {
+                textViewPortSystem.setText( "PORT INCONNU" );
+            }
         } );
 
         // Bouton pour se déconnecter du serveur
         view.findViewById( R.id.btnDisconnect ).setOnClickListener( v -> {
             viewModel.postLog( "[SYS] Déconnexion demandée par l'utilisateur" );
-            viewModel.postConnected( false );
+            viewModel.disconnectServer();
 
             BottomNavigationView bottomNav = requireActivity().findViewById( R.id.bottom_nav );
 

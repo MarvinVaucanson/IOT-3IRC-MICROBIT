@@ -6,6 +6,7 @@
     android:background="#121416"
     android:orientation="vertical">
 
+    <!-- TOP BAR -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,12 +19,12 @@
             android:id="@+id/btnBack"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:contentDescription="back"
-            android:padding="4dp"
-            android:src="@drawable/ic_signal"
             android:clickable="true"
+            android:contentDescription="back"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/ic_signal"
             app:tint="#B0C6FF" />
 
         <TextView
@@ -49,7 +50,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:padding="20dp">
 
@@ -74,11 +76,54 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="@font/inter"
+            android:lineSpacingMultiplier="1.4"
+            android:text="Maintenez et faites glisser pour réorganiser l'ordre d'affichage sur l'écran OLED."
+            android:textColor="#8888AA"
+            android:textSize="13sp" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewDeviceSensors"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/textViewCurrentOrder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="@font/space_grotesk"
+                android:gravity="center"
+                android:letterSpacing="0.15"
+                android:textColor="#8888AA"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btnSendOrder"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#B0C6FF"
+                android:fontFamily="@font/space_grotesk"
+                android:letterSpacing="0.1"
+                android:text="ENVOYER L'ORDRE D'AFFICHAGE >"
+                android:textColor="#002D6F"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
 </LinearLayout>

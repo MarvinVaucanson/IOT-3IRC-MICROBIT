@@ -25,6 +25,7 @@ public class SensorViewModel extends ViewModel {
     private UDPReceiver udpReceiver;
     private DatagramSocket sharedSocket;
 
+    // LiveData observables partagés entre les fragments
     private final MutableLiveData<Map<String, List<Sensor>>> deviceMap = new MutableLiveData<>( new HashMap<>() );
     private final MutableLiveData<List<String>> logListEntries = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> isConnected = new MutableLiveData<>( false );
@@ -35,6 +36,7 @@ public class SensorViewModel extends ViewModel {
     public LiveData<Boolean> getIsConnected() { return isConnected; }
     public LiveData<Integer> getCurrentServerPort() { return currentServerPort; }
 
+    // Fusionner les nouvelles données reçues avec les données existantes
     public void postDeviceData( Map<String, List<Sensor>> incomingData ) {
         Map<String, List<Sensor>> current = new HashMap<>();
         if ( deviceMap.getValue() != null ) {
@@ -45,6 +47,7 @@ public class SensorViewModel extends ViewModel {
         deviceMap.postValue( current );
     }
 
+    // Ajouter un message dans le log sur le thread principal
     public void postLog( String message ) {
         new Handler( Looper.getMainLooper() ).post( () ->
         {
@@ -58,9 +61,12 @@ public class SensorViewModel extends ViewModel {
             logListEntries.setValue( updated );
         } );
     }
+
     public void postConnected( boolean bool ) { isConnected.postValue( bool ); }
 
+    // Créer le socket partagé et démarrer les threads d'envoi et réception UDP
     public void connectServer( int port, String ip ) {
+        // Arrêter toute connexion existante avant d'en créer une nouvelle
         stopAll();
         try {
             sharedSocket = new DatagramSocket( port );
@@ -73,6 +79,7 @@ public class SensorViewModel extends ViewModel {
 
             currentServerPort.postValue( port );
 
+            // Envoyer un premier message pour signaler la connexion
             udpSender.sendData( "data" );
 
         } catch ( SocketException e ) {
@@ -81,6 +88,25 @@ public class SensorViewModel extends ViewModel {
         }
     }
 
+    // Se déconnecter du serveur UDP
+    public void disconnectServer() {
+        stopAll();
+        currentServerPort.postValue( null );
+        postConnected( false );
+    }
+
+    // Envoyer l'ordre d'affichage des capteurs
+    public void sendOrder( String deviceId, String order ) {
+        if ( udpSender != null ) {
+            String message = "configScreen/" + deviceId + ":" + order;
+            udpSender.sendData( message );
+            postLog( "[UDP] Ordre envoyé pour micro:bit " + deviceId + " : " + order );
+        } else {
+            postLog( "[ERR] Non connecté au serveur" );
+        }
+    }
+
+    // Arrêter les threads et fermer le socket
     private void stopAll() {
         if ( udpSender != null ) {
             udpSender.stop();
@@ -100,6 +126,7 @@ public class SensorViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
+        // Nettoyer les ressources quand le ViewModel est détruit
         stopAll();
     }
 }

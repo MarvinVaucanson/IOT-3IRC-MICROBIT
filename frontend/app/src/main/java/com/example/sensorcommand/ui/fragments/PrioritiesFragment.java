@@ -46,6 +46,7 @@ public class PrioritiesFragment extends Fragment {
 
         TextView textViewSelectDevices = view.findViewById( R.id.textViewSelectDevices );
 
+        // Initialiser la liste des appareils détectés
         RecyclerView recyclerView = view.findViewById( R.id.recyclerViewDevices );
         recyclerView.setLayoutManager( new LinearLayoutManager( requireContext() ) );
 
@@ -54,10 +55,12 @@ public class PrioritiesFragment extends Fragment {
 
         SensorViewModel viewModel = new ViewModelProvider( requireActivity() ).get( SensorViewModel.class );
 
+        // Observer l'état de connexion pour afficher un message adapté
         viewModel.getIsConnected().observe( getViewLifecycleOwner(), connected -> {
             if ( connected ) {
                 textViewSelectDevices.setText( "Sélectionnez un appareil pour consulter ses capteurs." );
             } else {
+                // Afficher un message d'erreur centré si non connecté
                 textViewSelectDevices.setText( "Vous n'êtes pas connectés au serveur :(\n\n" +
                         "Veuillez connecter au serveur pour pouvoir visualiser les appreils" );
                 textViewSelectDevices.setTextAlignment( TEXT_ALIGNMENT_CENTER );
@@ -71,9 +74,11 @@ public class PrioritiesFragment extends Fragment {
             }
         } );
 
+        // Observer les données pour mettre à jour la liste des appareils
         viewModel.getDeviceMap().observe( getViewLifecycleOwner(), this::updateDeviceList );
     }
 
+    // Mettre à jour la liste des identifiants d'appareils et trier par ordre alphabétique
     @SuppressLint( "NotifyDataSetChanged" )
     private void updateDeviceList( Map<String, List<Sensor>> deviceMap ) {
         deviceIds.clear();
@@ -84,6 +89,7 @@ public class PrioritiesFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    // Ouvrir le fragment de détail d'un appareil sélectionné
     private void openDevice( String deviceId ) {
         DeviceSensorsFragment fragment = DeviceSensorsFragment.newInstance( deviceId );
         requireActivity().getSupportFragmentManager()

@@ -22,12 +22,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
 
+        // Initialiser la barre de navigation et le gestionnaire de fragments
         bottomNav = findViewById( R.id.bottom_nav );
         fragmentManager = getSupportFragmentManager();
 
+        // Charger le fragment par défaut (Serveurs)
         loadFragment( new ServersFragment() );
         bottomNav.setSelectedItemId( R.id.nav_servers );
 
+        // Gérer la sélection des onglets de navigation
         bottomNav.setOnItemSelectedListener(item ->
         {
             Fragment selected;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         } );
     }
 
+    // Remplacer le fragment actuel dans le conteneur principal
     private void loadFragment( Fragment fragment ) {
         fragmentManager.popBackStack( null, FragmentManager.POP_BACK_STACK_INCLUSIVE );
         fragmentManager.beginTransaction()
