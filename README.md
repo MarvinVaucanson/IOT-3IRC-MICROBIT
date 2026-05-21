@@ -225,7 +225,7 @@ python common/influxTest.py
 ### Données capteurs (exemple brut)
 
 ```
-T:23.5 L:412 H:58 P:1013
+&2|23.5|412|58|1013$
 ```
 
 ### Données capteurs (exemple JSON — optionnel)

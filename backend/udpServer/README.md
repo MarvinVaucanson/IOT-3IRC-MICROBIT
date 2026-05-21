@@ -7,7 +7,7 @@ spécifique, on reçoit une réponse spécifique.
 Il suffit d'envoyer la chaîne `device` pour récupérer la liste de tous les capteurs. 
 La réponse ressemblera à ça :
 ```json
-["office_01", "office_02", "office_03", "office_04"]
+["device_01", "device_02", "device_03", "device_04"]
 ```
 
 ### Obtention des dernières mesures des capteurs
@@ -20,63 +20,63 @@ capteur et pour chaque mesure. Voici un exemple de résultat :
       "value":52.57644811296619,
       "unit":"%",
       "protocol":"UDP",
-      "deviceId":"office_01"
+      "deviceId":"device_01"
    },
    {
       "sensor":"luminosite",
       "value":313,
       "unit":"lux",
       "protocol":"UDP",
-      "deviceId":"office_01"
+      "deviceId":"device_01"
    },
    {
       "sensor":"temperature",
       "value":24.583219397906085,
       "unit":"\\c2\b0C",
       "protocol":"UDP",
-      "deviceId":"office_01"
+      "deviceId":"device_01"
    },
    {
       "sensor":"humidite",
       "value":52.82701416333847,
       "unit":"%",
       "protocol":"UDP",
-      "deviceId":"office_02"
+      "deviceId":"device_02"
    },
    {
       "sensor":"luminosite",
       "value":455,
       "unit":"lux",
       "protocol":"UDP",
-      "deviceId":"office_02"
+      "deviceId":"device_02"
    },
    {
       "sensor":"temperature",
       "value":21.866232232187027,
       "unit":"\\c2\b0C",
       "protocol":"UDP",
-      "deviceId":"office_02"
+      "deviceId":"device_02"
    },
    {
       "sensor":"humidite",
       "value":50.99352212907614,
       "unit":"%",
       "protocol":"UDP",
-      "deviceId":"office_03"
+      "deviceId":"device_03"
    },
    {
       "sensor":"luminosite",
       "value":365,
       "unit":"lux",
       "protocol":"UDP",
-      "deviceId":"office_03"
+      "deviceId":"device_03"
    },
    {
       "sensor":"temperature",
       "value":21.200708754127945,
       "unit":"\\c2\b0C",
       "protocol":"UDP",
-      "deviceId":"office_03"
+      "deviceId":"device_03"
    }
 ]
 ```
