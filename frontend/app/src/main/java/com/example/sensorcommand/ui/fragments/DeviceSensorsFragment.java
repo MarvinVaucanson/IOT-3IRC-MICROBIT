@@ -135,7 +135,7 @@ public class DeviceSensorsFragment extends Fragment {
         textViewCurrentOrder.setText( "ORDRE ACTUEL : " + order );
     }
 
-    // Mettre à jour la liste des capteurs en remplaçant par priorité ou en ajoutant les nouveaux
+    // Mettre à jour la liste des capteurs en remplaçant par les initiaux
     private void updateSensors( Map<String, List<Sensor>> deviceMap )
     {
         List<Sensor> updated = deviceMap.get( deviceId );
@@ -143,7 +143,7 @@ public class DeviceSensorsFragment extends Fragment {
         if ( updated == null || updated.isEmpty() ) return;
 
         if ( !initialLoadDone ) {
-            // Tri initial par priorité pour un ordre cohérent au départ
+            // Tri initial par l'initiale du capteur pour un ordre cohérent au départ
             sensors.clear();
             List<Sensor> sorted = new ArrayList<>( updated );
             Collections.sort( sorted, (a, b ) -> a.getInitial().compareTo( b.getInitial() ) );

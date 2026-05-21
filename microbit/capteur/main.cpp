@@ -27,6 +27,7 @@ struct SensorData {
 
 /* --- Configuration de l'afficahge --- */
 const char* OBJECT_ID = "01";
+const int deviceId = 1; // ID de l'appareil, à personnaliser pour chaque micro:bit
 const int SEND_INTERVAL_MS = 1000;
 char display_order[] = {'T', 'L', 'H', 'P'}; // Ordre d'affichage
 int num_sensors_to_display = 4;
@@ -167,17 +168,26 @@ void xorCrypt(char *message,const char *key)
 
 void onData(MicroBitEvent)
 {
-    ManagedString s = uBit.radio.datagram.recv();
+    PacketBuffer pb = uBit.radio.datagram.recv();
 
+    int len = pb.length();
     char buffer[255];
     memset(buffer, 0, sizeof(buffer));
-    strncpy(buffer, s.toCharArray(), sizeof(buffer) - 1);
-    xorCrypt(buffer, KEY);
+    for (int i = 0; i < len && i < 254; i++)
+        buffer[i] = pb[i];
+
+    int keylen = strlen(KEY);
+    for (int i = 0; i < len; i++)
+        buffer[i] ^= KEY[i % keylen];
 
     ManagedString cmd(buffer);
 
-    if (cmd.charAt(0) == '@') {
-        uBit.display.print("R");
+    int sep = -1;
+
+    if (cmd.charAt(0) == '&') {
+        // TEST
+        // uBit.display.print("C");
+        // uBit.display.scroll(cmd);
 
         ManagedString inner = cmd.substring(1, cmd.length() - 2);
 
@@ -186,6 +196,30 @@ void onData(MicroBitEvent)
             xorCrypt(reply, KEY);
             uBit.radio.datagram.send(ManagedString(reply));
             uBit.display.print("P");
+        } else {
+            for (int i = 0; i < inner.length(); i++) {
+                if (inner.charAt(i) == ':') {
+                    sep = i;
+                    break;
+                }
+            }
+        }
+        if (sep > 0) {
+            ManagedString idPart  = inner.substring(0, sep);
+            ManagedString ordPart = inner.substring(sep + 1, inner.length() - sep - 1);
+
+            int receivedId = atoi(idPart.toCharArray());
+
+            // uBit.display.print("O");
+            // uBit.display.scroll(ordPart);
+
+            if (receivedId == deviceId && ordPart.length() <= 4) {
+                num_sensors_to_display = ordPart.length();
+                for (int i = 0; i < num_sensors_to_display; i++) {
+                    display_order[i] = ordPart.charAt(i);
+                }
+                uBit.display.print("U");
+            }
         }
     }
 }
@@ -209,8 +243,6 @@ int main()
     tsl256x tsl(&uBit, &myI2C, 0x52);
 
     int last_time = 0;
-
-    int deviceId = 1; // ID de l'appareil, à personnaliser pour chaque micro:bit
 
     printText("Init...", 0, 0);
     uBit.sleep(1000);
@@ -249,7 +281,7 @@ int main()
             int result = uBit.radio.datagram.send(buffer);
     
             if (result == MICROBIT_OK)
-                uBit.display.scroll("SENT");
+                uBit.display.display(".");
             else if (result == MICROBIT_INVALID_PARAMETER)
                 uBit.display.scroll("ERR_PARAM");
             else if (result == MICROBIT_NOT_SUPPORTED){
