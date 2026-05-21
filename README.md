@@ -212,11 +212,11 @@ python common/influxTest.py
 
 ### UDP (Serveur ↔ Application Android)
 
-| Message | Direction | Description |
-|---|---|---|
-| `getValues()` | Android → Serveur | Demande les dernières données capteurs |
-| Données capteurs | Serveur → Android | Réponse avec les valeurs mesurées |
-| `TLH` / format personnalisé | Android → Serveur | Ordre de configuration de l'affichage |
+| Message | Direction | Description                                                     |
+|----|---|-----------------------------------------------------------------|
+| `data` | Android → Serveur | Demande les dernières données capteurs                          |
+| Données capteurs | Serveur → Android | Réponse avec les valeurs mesurées                               |
+| `configScreen/<device_id>:<config>` | Android → Serveur | Ordre d'afficahge des données sur l'écran d'une carte micro:bit |
 
 ---
 
