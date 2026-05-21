@@ -1,12 +1,14 @@
-import serial
-import threading
-import socket
-import re
+import serial, os, threading, socket, re
 
+from dotenv import load_dotenv
 from backend.common.influxHelper import writeToInfluxDB
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 # send serial message
-SERIALPORT = "COM3"
+SERIALPORT = os.getenv("UART_PORT")
 BAUDRATE = 115200
 START_CHAR = "&"
 END_CHAR = "$"

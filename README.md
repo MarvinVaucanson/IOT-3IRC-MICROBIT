@@ -69,11 +69,10 @@ L'objectif est de connecter des objets intelligents (micro:bit + capteurs mété
 
 **Exemple de configuration d'affichage reçue :**
 
-| Message reçu | Ordre d'affichage |
-|---|---|
-| `TLH` | Température → Luminosité → Humidité |
-| `LTH` | Luminosité → Température → Humidité |
-| `TLHP` | Température → Luminosité → Humidité → Pression |
+| Message reçu | Ordre d'affichage                              |
+|--------------|------------------------------------------------|
+| `LTHP`       | Luminosité → Température → Humidité → Pression |
+| `TLHP`       | Température → Luminosité → Humidité → Pression |
 
 ---
 
@@ -102,19 +101,23 @@ https://github.com/CPELyon/4irc-aiot-mini-projet/blob/master/controller.py
 
 **Fonctionnalités de base :**
 - Écoute sur le **port UDP 10000**
-- Stockage des données reçues dans un **fichier texte**
-- Réponse à la requête `getValues()` → renvoie les dernières données au client Android
+- Stockage les données reçues dans une base de données **InfluxDB**
+- Réponse à la requête `data` → renvoie les dernières données au client Android
 - Lecture/écriture sur le port série du micro:bit passerelle
 
 **Évolutions implémentées :**
-- [ ] Remplacement du fichier texte par une base de données (**InfluxDB**)
-- [ ] Format d'échange JSON entre tous les composants
-- [ ] Interface web de visualisation (**Grafana**)
-- [ ] Gestion multi-objets avec protocole d'identification
+- [X] Remplacement du fichier texte par une base de données (**InfluxDB**)
+- [X] Format d'échange JSON entre tous les composants
+- [X] Interface web de visualisation (**Grafana**)
+- [X] Gestion multi-objets avec protocole d'identification
 
 **Démarrage du serveur :**
 ```bash
-python controller.py
+# Lancement du serveur UDP, InfluxDB, Grafana
+docker compose up -d
+
+# Lancement du serveur UART
+python -m backend.uartServer.uartServer
 ```
 
 > ⚠️ Vérifier le port COM/tty associé au micro:bit passerelle et l'adapter dans le code.
@@ -133,7 +136,7 @@ python controller.py
 
 **Communication :**
 - Protocole : **UDP**
-- Envoi de l'ordre d'affichage : lettres majuscules (`TLH`, `LPH`, etc.) ou format JSON
+- Envoi de l'ordre d'affichage : lettres majuscules (`TLHP`, `LPHT`, etc.) ou format JSON
 - Pas d'ACK requis pour l'envoi de configuration
 - Réception passive des données envoyées par le serveur
 
@@ -177,11 +180,14 @@ cd IOT-3IRC-MICROBIT
 # Créer environnement Python et installer les dépendances
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r common/requirements.txt
 
 # Lancer le serveur de test
 cd backend
-docker compose up -build
+docker compose up -build -d
+# Lancer le serveur UART
+cd ..
+python -m backend.uartServer.uartServer
 
 # Envoyer des données de test
 python common/influxTest.py
