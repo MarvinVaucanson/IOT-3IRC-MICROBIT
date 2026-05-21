@@ -37,19 +37,15 @@ public class SensorDataParser {
                 // Associer chaque type de capteur à son initiale d'affichage
                 switch ( sensorType ) {
                     case "HUMIDITE":
-                    case "HUMI":
                         sensor = new Sensor( deviceId, "H", "Humidité", protocol, unit, value );
                         break;
                     case "LUMINOSITE":
-                    case "LUX":
                         sensor = new Sensor( deviceId, "L", "Luminosité", protocol, unit, value );
                         break;
                     case "TEMPERATURE":
-                    case "BOU":
                         sensor = new Sensor( deviceId, "T", "Température", protocol, unit, value );
                         break;
                     case "PRESSION":
-                    case "ACC":
                         sensor = new Sensor( deviceId, "P", "Pression", protocol, unit, value );
                         break;
                     case "CO2":
